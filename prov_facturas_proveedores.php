@@ -34,9 +34,11 @@ if (isset($_GET['Estado'])) {
 }
 
 $Where = "CardCode='" . $_SESSION['CodigoSAPProv'] . "' $WhereFecha $Filtro";
-// echo "SELECT * FROM uvw_Sap_tbl_FacturasCompras WHERE $Where";
 $SQL = Seleccionar('uvw_Sap_tbl_FacturasCompras', '*', $Where);
 $SQLCons = ReturnCons('uvw_Sap_tbl_FacturasCompras', '*', $Where);
+
+// SMM, 30/03/2023
+// echo "SELECT * FROM uvw_Sap_tbl_FacturasCompras WHERE $Where";
 ?>
 <!DOCTYPE html>
 <html><!-- InstanceBegin template="/Templates/PlantillaPrincipal.dwt.php" codeOutsideHTMLIsLocked="false" -->

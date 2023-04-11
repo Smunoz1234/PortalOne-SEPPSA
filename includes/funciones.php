@@ -93,7 +93,10 @@ function InsertarLog($Type, $Code, $Consulta)
 function ConsultarPago($DocEntry, $CardCode)
 {
     global $conexion;
+
     $Con = "EXEC usp_ConsultarPagoFactura '" . $DocEntry . "', '" . $CardCode . "'";
+    // echo "<br>" . $Con . "<br>";
+
     $SQL = sqlsrv_query($conexion, $Con);
     $row = sqlsrv_fetch_array($SQL);
     return $row;
@@ -958,7 +961,10 @@ function ConsultarDescargaArchivo($ID_Archivo)
 function ContarClienteUsuario($ID_Usuario)
 { //Contar cuantas sucursales tiene asignados el usuario
     global $conexion;
+
     $Con = "Select Count(ID_Usuario) as Cant From uvw_tbl_ClienteUsuario Where ID_Usuario='" . $ID_Usuario . "'";
+    // echo "<br>" . $Con . "<br>";
+
     $SQL = sqlsrv_query($conexion, $Con);
     $row = sqlsrv_fetch_array($SQL);
     return $row['Cant'];

@@ -36,8 +36,11 @@ if (isset($_GET['BuscarDato']) && $_GET['BuscarDato'] != "") {
     $Filtro .= " and (DocNum LIKE '%" . $_GET['BuscarDato'] . "%' OR NombreContacto LIKE '%" . $_GET['BuscarDato'] . "%' OR DocNumLlamadaServicio LIKE '%" . $_GET['BuscarDato'] . "%' OR ID_LlamadaServicio LIKE '%" . $_GET['BuscarDato'] . "%' OR IdDocPortal LIKE '%" . $_GET['BuscarDato'] . "%' OR NombreEmpleadoVentas LIKE '%" . $_GET['BuscarDato'] . "%' OR Comentarios LIKE '%" . $_GET['BuscarDato'] . "%')";
 }
 
-$SQL = Seleccionar('uvw_Sap_tbl_OrdenesCompras', '*', "CardCode='" . $_SESSION['CodigoSAPProv'] . "' $WhereFecha $Filtro");
+$Where = "CardCode='" . $_SESSION['CodigoSAPProv'] . "' $WhereFecha $Filtro";
+$SQL = Seleccionar('uvw_Sap_tbl_OrdenesCompras', '*', $Where);
 
+// SMM, 30/03/2023
+// echo "SELECT * FROM uvw_Sap_tbl_OrdenesCompras WHERE $Where";
 ?>
 
 <!DOCTYPE html>

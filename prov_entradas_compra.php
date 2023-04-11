@@ -43,9 +43,12 @@ if (isset($_GET['BuscarDato']) && $_GET['BuscarDato'] != "") {
 }
 
 $Where = "CardCode='" . $_SESSION['CodigoSAPProv'] . "' $WhereFecha $Filtro";
-// echo "SELECT * FROM uvw_Sap_tbl_EntradasCompras WHERE $Where";
 $SQL = Seleccionar('uvw_Sap_tbl_EntradasCompras', '*', $Where);
+
+// SMM, 30/03/2023
+// echo "SELECT * FROM uvw_Sap_tbl_EntradasCompras WHERE $Where";
 ?>
+
 <!DOCTYPE html>
 <html><!-- InstanceBegin template="/Templates/PlantillaPrincipal.dwt.php" codeOutsideHTMLIsLocked="false" -->
 
