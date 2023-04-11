@@ -1,48 +1,70 @@
 <?php require_once "includes/conexion.php";
 PermitirAcceso(601);
+$sw = 0;
+$sp = 'sp_ConsultarPagosEfectuados';
 
-$Filtro = "";
-$FiltroFecha = "";
-$WhereFecha = "";
-
-if (isset($_GET['FiltroFecha']) && $_GET['FiltroFecha'] != "") {
-    $FiltroFecha = $_GET['FiltroFecha'];
-} else {
-    $FiltroFecha = "FechaPago";
+// AGREGAR FILTRO DE PROVEEDOR
+$Proveedor = "";
+if (isset($_GET['Cliente']) && $_GET['Cliente'] != "") {
+    $Proveedor = $_GET['Cliente'];
+    $sw = 1;
 }
 
-//Fechas
-if (isset($_GET['FechaInicial']) && $_GET['FechaInicial'] != "") {
-    $FechaInicial = $_GET['FechaInicial'];
+// AGREGAR FECHA DE FECHA DE REGISTRO
+$FI_Registro = "";
+$FF_Registro = "";
+if (isset($_GET['FI_Registro']) && $_GET['FI_Registro'] != "") {
+    $FI_Registro = $_GET['FI_Registro'];
     $sw = 1;
 } else {
-    //Restar 7 dias a la fecha actual
-    $fecha = date('Y-m-d');
-    $nuevafecha = strtotime('-' . ObtenerVariable("DiasRangoFechasDocSAP") . ' day');
-    $nuevafecha = date('Y-m-d', $nuevafecha);
-    $FechaInicial = $nuevafecha;
-//    $FechaInicial="";
+    /// Restar "n" días a la fecha actual.
+    $nuevaFecha = strtotime('-' . ObtenerVariable("DiasRangoFechasGestionar") . ' day');
+    $nuevaFecha = date('Y-m-d', $nuevaFecha);
+
+    // SMM, 11/04/2023
+    $FI_Registro = $nuevaFecha;
 }
-if (isset($_GET['FechaFinal']) && $_GET['FechaFinal'] != "") {
-    $FechaFinal = $_GET['FechaFinal'];
-    $WhereFecha = "and Canceled <> 'Y' and ($FiltroFecha Between '" . FormatoFecha($FechaInicial) . "' and '" . FormatoFecha($FechaFinal) . "')";
+if (isset($_GET['FF_Registro']) && $_GET['FF_Registro'] != "") {
+    $FF_Registro = $_GET['FF_Registro'];
+    $sw = 1;
 } else {
-    $FechaFinal = date('Y-m-d');
-    $WhereFecha = "and Canceled <> 'Y' and ($FiltroFecha Between '" . FormatoFecha($FechaInicial) . "' and '" . FormatoFecha($FechaFinal) . "')";
-//    $FechaFinal="";
+    // SMM, 11/04/2023
+    $FF_Registro = date('Y-m-d');
 }
 
-if (isset($_GET['BuscarDato']) && $_GET['BuscarDato'] != "") {
-    $Filtro .= "and (ValorPago LIKE '%" . $_GET['BuscarDato'] . "%' OR FacturaProveedor LIKE '%" . $_GET['BuscarDato'] . "%' OR NumIntFactura LIKE '%" . $_GET['BuscarDato'] . "%')";
+// AGREGAR FILTROS DE FECHA DE PAGO
+$FI_Pago = "";
+$FF_Pago = "";
+if (isset($_GET['FI_Pago']) && $_GET['FI_Pago'] != "") {
+    $FI_Pago = $_GET['FI_Pago'];
+    $sw = 1;
+} else {
+    // Restar "n" días a la fecha actual.
+    $nuevaFecha = strtotime('-' . ObtenerVariable("DiasRangoFechasGestionar") . ' day');
+    $nuevaFecha = date('Y-m-d', $nuevaFecha);
+
+    // SMM, 11/04/2023
+    // $FI_Pago = $nuevaFecha;
+}
+if (isset($_GET['FF_Pago']) && $_GET['FF_Pago'] != "") {
+    $FF_Pago = $_GET['FF_Pago'];
+    $sw = 1;
+} else {
+    // SMM, 11/04/2023
+    // $FF_Pago = date('Y-m-d');
 }
 
-$Where = "CardCode='" . $_SESSION['CodigoSAPProv'] . "' $WhereFecha $Filtro ";
+if ($sw == 1) {
+    $Param = array(
+        "'" . $Proveedor . "'",
+        "'" . FormatoFecha($FI_Registro) . "'",
+        "'" . FormatoFecha($FF_Registro) . "'",
+        "'" . FormatoFecha($FI_Pago) . "'",
+        "'" . FormatoFecha($FF_Pago) . "'",
+    );
 
-$SQL = Seleccionar('uvw_Sap_tbl_Pagos_Efectuados', '*', $Where);
-$SQLCons = ReturnCons('uvw_Sap_tbl_Pagos_Efectuados', '*', $Where);
-
-// SMM, 30/03/2023
-// echo "SELECT * FROM uvw_Sap_tbl_Pagos_Efectuados WHERE $Where";
+    $SQL = EjecutarSP($sp, $Param);
+}
 ?>
 
 <!DOCTYPE html>
@@ -90,45 +112,68 @@ $SQLCons = ReturnCons('uvw_Sap_tbl_Pagos_Efectuados', '*', $Where);
 				<div class="col-lg-12">
 					<div class="ibox-content">
 						 <?php include "includes/spinner.php";?>
-					  <form action="prov_pagos_efectuados.php" method="get" id="formBuscar" class="form-horizontal">
+					  <form action="envio_correo_proveedores.php" method="get" id="formBuscar" class="form-horizontal">
 							<div class="form-group">
 								<label class="col-xs-12"><h3 class="bg-success p-xs b-r-sm"><i class="fa fa-filter"></i> Datos para filtrar</h3></label>
 							</div>
+
 							<div class="form-group">
-								<label class="col-lg-1 control-label">Filtro fecha</label>
-								<div class="col-lg-2">
-									<select name="FiltroFecha" class="form-control m-b" id="FiltroFecha">
-										<option value="FechaContFactura" <?php if ($FiltroFecha == "FechaContFactura") {echo "selected=\"selected\"";}?>>Fecha factura</option>
-										<option value="FechaVencFactura" <?php if ($FiltroFecha == "FechaVencFactura") {echo "selected=\"selected\"";}?>>Fecha vencimiento</option>
-										<option value="FechaPago" <?php if ($FiltroFecha == "FechaPago") {echo "selected=\"selected\"";}?>>Fecha pago</option>
-									</select>
+								<label class="col-lg-1 control-label">Proveedor</label>
+								<div class="col-lg-3">
+									<input name="Cliente" type="hidden" id="Cliente" value="<?php if (isset($_GET['Cliente']) && ($_GET['Cliente'] != "")) {echo $_GET['Cliente'];}?>">
+									<input name="NombreCliente" type="text" class="form-control" id="NombreCliente" placeholder="Para TODOS, dejar vacio..." value="<?php if (isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['NombreCliente'];}?>">
 								</div>
-								<label class="col-lg-1 control-label">Fechas</label>
+
+
+								<label class="col-lg-1 control-label">Fecha de registro</label>
 								<div class="col-lg-3">
 									<div class="input-daterange input-group" id="datepicker">
-										<input name="FechaInicial" type="text" class="input-sm form-control" id="FechaInicial" placeholder="Fecha inicial" value="<?php echo $FechaInicial; ?>" autocomplete="off"/>
+										<input name="FI_Registro" type="text" class="input-sm form-control fecha" id="FI_Registro" placeholder="Fecha inicial" value="<?php echo $FI_Registro; ?>" autocomplete="off"/>
 										<span class="input-group-addon">hasta</span>
-										<input name="FechaFinal" type="text" class="input-sm form-control" id="FechaFinal" placeholder="Fecha final" value="<?php echo $FechaFinal; ?>" autocomplete="off" />
+										<input name="FF_Registro" type="text" class="input-sm form-control fecha" id="FF_Registro" placeholder="Fecha final" value="<?php echo $FF_Registro; ?>" autocomplete="off" />
 									</div>
 								</div>
-								<label class="col-lg-1 control-label">Buscar dato</label>
+							</div>
+
+							<div class="form-group">
+								<label class="col-lg-1 control-label">Fecha de pago</label>
 								<div class="col-lg-3">
-									<input name="BuscarDato" type="text" class="form-control" id="BuscarDato" maxlength="100" value="<?php if (isset($_GET['BuscarDato']) && ($_GET['BuscarDato'] != "")) {echo $_GET['BuscarDato'];}?>">
+									<div class="input-daterange input-group" id="datepicker">
+										<input name="FI_Pago" type="text" class="input-sm form-control fecha" id="FI_Pago" placeholder="Fecha inicial" value="<?php echo $FI_Pago; ?>" autocomplete="off"/>
+										<span class="input-group-addon">hasta</span>
+										<input name="FF_Pago" type="text" class="input-sm form-control fecha" id="FF_Pago" placeholder="Fecha final" value="<?php echo $FF_Pago; ?>" autocomplete="off" />
+									</div>
 								</div>
-								<div class="col-lg-1">
-									<button type="submit" class="btn btn-outline btn-success pull-right"><i class="fa fa-search"></i> Buscar</button>
+
+								<label class="col-lg-1 control-label">Número Egreso</label>
+								<div class="col-lg-3">
+									<input name="CiudadSede" type="text" class="form-control" id="CiudadSede" maxlength="100" value="<?php if (isset($_GET['CiudadSede']) && ($_GET['CiudadSede'] != "")) {echo $_GET['CiudadSede'];}?>">
+								</div>
+
+								<div class="col-lg-4">
+									<div class="btn-group pull-right">
+										<button type="submit" class="btn btn-outline btn-success" style="margin-right: 10px;"><i class="fa fa-search"></i> Buscar</button>
+										<button type="button" class="btn btn-outline btn-warning" ><i class="fa fa-save"></i> Guardar</button>
+									</div>
 								</div>
 							</div>
-						  	<div class="form-group">
-								<div class="col-lg-12">
-									<a href="exportar_excel.php?exp=15&Cons=<?php echo base64_encode($SQLCons); ?>"><img src="css/exp_excel.png" width="50" height="30" alt="Exportar a Excel" title="Exportar a Excel"/></a>
+
+							<?php if (($sw == 1) && sqlsrv_has_rows($SQL)) {?>
+								<div class="form-group">
+									<div class="col-lg-10">
+										<a href="exportar_excel.php?exp=10&Cons=<?php echo base64_encode(implode(",", $Param)); ?>&sp=<?php echo base64_encode($sp); ?>">
+											<img src="css/exp_excel.png" width="50" height="30" alt="Exportar a Excel" title="Exportar a Excel"/>
+										</a>
+									</div>
 								</div>
-						  	</div>
+							<?php }?>
 					 </form>
 				</div>
 			</div>
 		  </div>
          <br>
+
+		 <?php if ($sw == 1) {?>
           <div class="row">
            <div class="col-lg-12">
 			    <div class="ibox-content">
@@ -173,6 +218,8 @@ $SQLCons = ReturnCons('uvw_Sap_tbl_Pagos_Efectuados', '*', $Where);
 			</div>
 			 </div>
           </div>
+		<?php }?>
+
 		</div>
         <!-- InstanceEndEditable -->
         <?php include_once "includes/footer.php";?>
@@ -192,7 +239,8 @@ $SQLCons = ReturnCons('uvw_Sap_tbl_Pagos_Efectuados', '*', $Where);
 			 $(".alkin").on('click', function(){
 					$('.ibox-content').toggleClass('sk-loading');
 				});
-			 $('#FechaInicial').datepicker({
+
+			$('.fecha').datepicker({
                 todayBtn: "linked",
                 keyboardNavigation: false,
                 forceParse: false,
@@ -201,15 +249,28 @@ $SQLCons = ReturnCons('uvw_Sap_tbl_Pagos_Efectuados', '*', $Where);
 				format: 'yyyy-mm-dd',
 				todayHighlight: true,
             });
-			$('#FechaFinal').datepicker({
-                todayBtn: "linked",
-                keyboardNavigation: false,
-                forceParse: false,
-                calendarWeeks: true,
-                autoclose: true,
-				format: 'yyyy-mm-dd',
-				todayHighlight: true,
-            });
+
+			$('.chosen-select').chosen({width: "100%"});
+
+			var options = {
+				url: function(phrase) {
+					return "ajx_buscar_datos_json.php?type=7&id="+phrase+"&pv=1";
+				},
+
+				getValue: "NombreBuscarCliente",
+				requestDelay: 400,
+				list: {
+					match: {
+						enabled: true
+					},
+					onClickEvent: function() {
+						var value = $("#NombreCliente").getSelectedItemData().CodigoCliente;
+						$("#Cliente").val(value);
+					}
+				}
+			};
+
+			$("#NombreCliente").easyAutocomplete(options);
 
             $('.dataTables-example').DataTable({
                 pageLength: 10,
