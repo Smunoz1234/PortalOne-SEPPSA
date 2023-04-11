@@ -305,7 +305,7 @@ $Num_Menu = sqlsrv_num_rows($SQL_Menu);
 								<?php if (PermitirFuncion(1206)) {?><li><a class="alnk" href="consultar_salida_inventario.php">Consultar salida de traslado</a></li><?php }?>
 							</ul>
 						</li>
-						
+
 						<?php if (PermitirFuncion([1210])) {?>
 						<li>
 							<a href="#">Consultas borradores <span class="fa arrow"></span></a>
@@ -392,6 +392,16 @@ $Num_Menu = sqlsrv_num_rows($SQL_Menu);
 								<li><a class="alnk" href="prov_certificado_retenciones.php">Certificado de retenciones</a></li>
 							</ul>
 						</li>
+
+						<?php if (true) {?>
+						<li>
+							<a href="#">Asistentes <span class="fa arrow"></span></a>
+							<ul class='nav nav-third-level'>
+								<?php if (true) {?><li><a class="alnk" href="envio_correo_clientes.php">Envío correo a clientes</a></li><?php }?>
+								<?php if (true) {?><li><a class="alnk" href="envio_correo_proveedores.php">Envío correo a proveedores</a></li><?php }?>
+							</ul>
+						</li>
+						<?php }?>
                     </ul>
                 </li>
 				<?php }?>
