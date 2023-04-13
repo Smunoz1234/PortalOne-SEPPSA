@@ -73,7 +73,7 @@ if ($sw == 1) {
 <head>
 <?php include_once "includes/cabecera.php";?>
 <!-- InstanceBeginEditable name="doctitle" -->
-<title>Pagos efectuados | <?php echo NOMBRE_PORTAL; ?></title>
+<title>Envio correo a proveedores | <?php echo NOMBRE_PORTAL; ?></title>
 <!-- InstanceEndEditable -->
 <!-- InstanceBeginEditable name="head" -->
 
@@ -169,7 +169,7 @@ if ($sw == 1) {
         <!-- InstanceBeginEditable name="Contenido" -->
         <div class="row wrapper border-bottom white-bg page-heading">
                 <div class="col-sm-8">
-                    <h2>>Envio correo a proveedores</h2>
+                    <h2>Envio correo a proveedores</h2>
                     <ol class="breadcrumb">
                         <li>
                             <a href="index1.php">Inicio</a>
@@ -274,18 +274,18 @@ if ($sw == 1) {
 											<button type="button" id="btnBorrarLineas" title="Borrar lineas" class="btn btn-danger btn-xs" disabled onClick="BorrarLineas();"><i class="fa fa-trash"></i></button>
 										</th>
 
+										<th>Proveedor</th>
+
 										<th>Núm. Factura Proveedor</th>
 										<th>Núm. Factura SAP B1</th>
 
 										<th>Fecha Factura</th>
 										<th>Fecha Vencimiento</th>
-										<th>Núm. Pago</th> <!-- Egreso -->
 										<th>Valor Factura</th>
 
-										<th>Proveedor</th>
+										<th>Núm. Pago</th> <!-- Egreso -->
 
 										<th>Fecha Pago</th>
-
 										<th>Valor Pago</th>
 
 										<th>Correo electrónico</th>
@@ -304,23 +304,23 @@ if ($sw == 1) {
 												<div class="checkbox checkbox-success"><input type="checkbox" class="chkSel" id="chkSel<?php echo $cont; ?>" onChange="Seleccionar('<?php echo $cont; ?>');"><label></label></div>
 											</td>
 
+											<td><?php echo $row['id_proveedor'] . " - " . $row['proveedor']; ?></td>
+
 											<td><?php echo $row['numero_factura_Proveedor']; ?></td>
 											<td><?php echo $row['numero_factura_SAPB1']; ?></td>
 
 											<td><?php if ($row['fecha_factura'] != "") {echo $row['fecha_factura']->format('Y-m-d');} else {echo "--";}?></td>
 											<td><?php if ($row['fecha_vencimiento_factura'] != "") {echo $row['fecha_vencimiento_factura']->format('Y-m-d');} else {echo "--";}?></td>
-											<td><?php echo $row['numero_pago']; ?></td>
 											<td align="right"><?php echo number_format($row['valor_factura'], 2); ?></td>
 
-											<td><?php echo $row['proveedor']; ?></td>
+											<td><?php echo $row['numero_pago']; ?></td>
 
 											<td><?php if ($row['fecha_pago'] != "") {echo $row['fecha_pago']->format('Y-m-d');} else {echo "--";}?></td>
-
 											<td align="right">
 												Efectivo: <?php echo number_format($row['valor_pago_efectivo'], 2); ?>
 												<br>Transferencia: <?php echo number_format($row['valor_pago_tranferencia'], 2); ?>
 												<br>Cheque: <?php echo number_format($row['valor_pago_cheque'], 2); ?>
-												<br>Núm. Cheque: <?php echo $row['numero_cheque']; ?>
+												<br>Núm. Cheque: <?php echo $row['numero_cheque'] ?? "--"; ?>
 											</td>
 
 											<td>
@@ -366,6 +366,52 @@ $(document).ready(function(){
 		let fecha_inicial = $("#FI_Pago").val();
 		let fecha_final = $("#FF_Pago").val();
 
+		// Obtener los valores de las columnas de todas las filas de la tabla
+		let table = $('#miTabla').DataTable();
+		let data = table.rows().data();
+
+		// Armar el objeto JSON
+		let jsonData = [];
+		data.each(function(rowData) {
+			let datos_proveedor = rowData[1].split(" - ");
+
+			// Buscar datos de pago
+			let datos_pago = rowData[9];
+			let numero_cheque = /Núm\. Cheque: (.+)/.exec(datos_pago)[1];
+			let valor_pago_efectivo = parseFloat(/Efectivo: ([\d,\.]+)/.exec(datos_pago)[1].replace(',', ''));
+			let valor_pago_transferencia = parseFloat(/Transferencia: ([\d,\.]+)/.exec(datos_pago)[1].replace(',', ''));
+			let valor_pago_cheque = parseFloat(/Cheque: ([\d,\.]+)/.exec(datos_pago)[1].replace(',', ''));
+			let valor_pago = valor_pago_efectivo + valor_pago_transferencia + valor_pago_cheque;
+
+			// Definir la expresión regular para buscar las direcciones de correo electrónico
+			let regexCorreo = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
+			let rowObj = {
+				id_proveedor: datos_proveedor[0],
+				proveedor: datos_proveedor[1],
+				numero_factura_proveedor: rowData[2],
+				numero_factura_SAPB1: rowData[3],
+				fecha_factura: rowData[4],
+				fecha_vencimiento_factura: rowData[5],
+				valor_factura: rowData[6],
+				numero_pago: rowData[7],
+				fecha_pago: rowData[8],
+				valor_pago: valor_pago,
+				valor_pago_tranferencia: valor_pago_transferencia,
+				valor_pago_efectivo: valor_pago_efectivo,
+				numero_cheque: numero_cheque,
+				valor_pago_cheque: valor_pago_cheque,
+				id_contacto: "",
+				contacto: "",
+				lista_correo_electronico_envio: rowData[10].match(regexCorreo).join(';')
+			};
+
+			jsonData.push(rowObj);
+		});
+
+		console.log(jsonData);
+
+		/*
 		$.ajax({
 			url: "envio_correo_proveedores_ws.php",
 			method: "POST",
@@ -395,6 +441,7 @@ $(document).ready(function(){
 				console.error("Guardar", error.responseText);
 			}
 		});
+		*/
 	});
 
 	$("#formBuscar").validate({
