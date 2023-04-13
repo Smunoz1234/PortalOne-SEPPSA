@@ -360,7 +360,31 @@ if ($sw == 1) {
 <script>
 $(document).ready(function(){
 	$("#Guardar").on('click', function() {
+		let descripcion = $("#descripcion").val();
+		let id_proveedor = $("#Cliente").val();
+		let proveedor = $("#NombreCliente").val();
+		let fecha_inicial = $("#FI_Pago").val();
+		let fecha_final = $("#FF_Pago").val();
 
+		$.ajax({
+			url: "envio_correo_proveedores_ws.php",
+			method: "POST",
+			data: {
+				descripcion: descripcion,
+				id_proveedor: id_proveedor,
+				proveedor: proveedor,
+				fecha_inicial: fecha_inicial,
+				fecha_final: fecha_final,
+			},
+			success: function(response) {
+				console.log(response);
+				// hacer algo con la respuesta del servidor
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				console.log(textStatus, errorThrown);
+				// manejar el error
+			}
+		});
 	});
 
 	$("#formBuscar").validate({
