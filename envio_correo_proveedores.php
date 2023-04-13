@@ -377,12 +377,22 @@ $(document).ready(function(){
 				fecha_final: fecha_final,
 			},
 			success: function(response) {
-				console.log(response);
-				// hacer algo con la respuesta del servidor
+				if(response == "OK") {
+					Swal.fire({
+						title: "¡Listo!",
+						text: "Procedimiento ejecutado exitosamente.",
+						icon: "success"
+					});
+				} else {
+					Swal.fire({
+						title: "¡Ha ocurrido un error!",
+						text: response,
+						icon: "error"
+					});
+				}
 			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				console.log(textStatus, errorThrown);
-				// manejar el error
+			error: function(error) {
+				console.error("Guardar", error.responseText);
 			}
 		});
 	});

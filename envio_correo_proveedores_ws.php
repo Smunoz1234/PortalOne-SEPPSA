@@ -1,5 +1,5 @@
 <?php require_once "includes/conexion.php";
-print_r($_POST);
+// print_r($_POST);
 $sw_error = 0;
 
 $descripcion = "'" . $_POST["descripcion"] . "'";
@@ -35,6 +35,8 @@ if (!$SQL) {
 
 if ($sw_error == 1) {
     echo $msg_error;
+} else {
+    echo "OK";
 }
 
 sqlsrv_close($conexion);
