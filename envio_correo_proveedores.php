@@ -169,7 +169,7 @@ if ($sw == 1) {
         <!-- InstanceBeginEditable name="Contenido" -->
         <div class="row wrapper border-bottom white-bg page-heading">
                 <div class="col-sm-8">
-                    <h2>Pagos efectuados</h2>
+                    <h2>>Envio correo a proveedores</h2>
                     <ol class="breadcrumb">
                         <li>
                             <a href="index1.php">Inicio</a>
@@ -181,7 +181,7 @@ if ($sw == 1) {
                             <a href="#">Asistentes</a>
                         </li>
                         <li class="active">
-                            <strong>Pagos efectuados</strong>
+                            <strong>Envio correo a proveedores</strong>
                         </li>
                     </ol>
                 </div>
@@ -240,7 +240,7 @@ if ($sw == 1) {
 									<div class="col-lg-4"></div>
 
 									<div class="col-lg-4">
-										<button type="button" class="btn btn-outline btn-warning"><i class="fa fa-save"></i> Guardar</button>
+										<button type="button" class="btn btn-outline btn-warning" id="Guardar"><i class="fa fa-save"></i> Guardar</button>
 									</div>
 								</div>
 
@@ -356,85 +356,90 @@ if ($sw == 1) {
 </div>
 <?php include_once "includes/pie.php";?>
 <!-- InstanceBeginEditable name="EditRegion4" -->
- <script>
-        $(document).ready(function(){
-			$("#formBuscar").validate({
-			 submitHandler: function(form){
-				 $('.ibox-content').toggleClass('sk-loading');
-				 form.submit();
-				}
-			});
-			 $(".alkin").on('click', function(){
-					$('.ibox-content').toggleClass('sk-loading');
-				});
 
-			$('.fecha').datepicker({
-                todayBtn: "linked",
-                keyboardNavigation: false,
-                forceParse: false,
-                calendarWeeks: true,
-                autoclose: true,
-				format: 'yyyy-mm-dd',
-				todayHighlight: true,
-            });
+<script>
+$(document).ready(function(){
+	$("#Guardar").on('click', function() {
 
-			$('.chosen-select').chosen({width: "100%"});
+	});
 
-			var options = {
-				url: function(phrase) {
-					return "ajx_buscar_datos_json.php?type=7&id="+phrase+"&pv=1";
-				},
+	$("#formBuscar").validate({
+		submitHandler: function(form){
+			$('.ibox-content').toggleClass('sk-loading');
+			form.submit();
+		}
+	});
 
-				getValue: "NombreBuscarCliente",
-				requestDelay: 400,
-				list: {
-					match: {
-						enabled: true
-					},
-					onClickEvent: function() {
-						var value = $("#NombreCliente").getSelectedItemData().CodigoCliente;
-						$("#Cliente").val(value);
-					}
-				}
-			};
+	$(".alkin").on('click', function(){
+		$('.ibox-content').toggleClass('sk-loading');
+	});
 
-			$("#NombreCliente").easyAutocomplete(options);
+	$('.fecha').datepicker({
+		todayBtn: "linked",
+		keyboardNavigation: false,
+		forceParse: false,
+		calendarWeeks: true,
+		autoclose: true,
+		format: 'yyyy-mm-dd',
+		todayHighlight: true,
+	});
 
-            $('.dataTables-example').DataTable({
-                pageLength: 10,
-                responsive: true,
-                dom: '<"html5buttons"B>lTfgitp',
-				language: {
-					"decimal":        "",
-					"emptyTable":     "No se encontraron resultados.",
-					"info":           "Mostrando _START_ - _END_ de _TOTAL_ registros",
-					"infoEmpty":      "Mostrando 0 - 0 de 0 registros",
-					"infoFiltered":   "(filtrando de _MAX_ registros)",
-					"infoPostFix":    "",
-					"thousands":      ",",
-					"lengthMenu":     "Mostrar _MENU_ registros",
-					"loadingRecords": "Cargando...",
-					"processing":     "Procesando...",
-					"search":         "Filtrar:",
-					"zeroRecords":    "Ningún registro encontrado",
-					"paginate": {
-						"first":      "Primero",
-						"last":       "Último",
-						"next":       "Siguiente",
-						"previous":   "Anterior"
-					},
-					"aria": {
-						"sortAscending":  ": Activar para ordenar la columna ascendente",
-						"sortDescending": ": Activar para ordenar la columna descendente"
-					}
-				},
-                buttons: []
+	$('.chosen-select').chosen({width: "100%"});
 
-            });
+	let options = {
+		url: function(phrase) {
+			return "ajx_buscar_datos_json.php?type=7&id="+phrase+"&pv=1";
+		},
 
-        });
+		getValue: "NombreBuscarCliente",
+		requestDelay: 400,
+		list: {
+			match: {
+				enabled: true
+			},
+			onClickEvent: function() {
+				var value = $("#NombreCliente").getSelectedItemData().CodigoCliente;
+				$("#Cliente").val(value);
+			}
+		}
+	};
 
-    </script>
+	$("#NombreCliente").easyAutocomplete(options);
+
+	$('.dataTables-example').DataTable({
+		pageLength: 10,
+		responsive: true,
+		dom: '<"html5buttons"B>lTfgitp',
+		language: {
+			"decimal":        "",
+			"emptyTable":     "No se encontraron resultados.",
+			"info":           "Mostrando _START_ - _END_ de _TOTAL_ registros",
+			"infoEmpty":      "Mostrando 0 - 0 de 0 registros",
+			"infoFiltered":   "(filtrando de _MAX_ registros)",
+			"infoPostFix":    "",
+			"thousands":      ",",
+			"lengthMenu":     "Mostrar _MENU_ registros",
+			"loadingRecords": "Cargando...",
+			"processing":     "Procesando...",
+			"search":         "Filtrar:",
+			"zeroRecords":    "Ningún registro encontrado",
+			"paginate": {
+				"first":      "Primero",
+				"last":       "Último",
+				"next":       "Siguiente",
+				"previous":   "Anterior"
+			},
+			"aria": {
+				"sortAscending":  ": Activar para ordenar la columna ascendente",
+				"sortDescending": ": Activar para ordenar la columna descendente"
+			}
+		},
+		buttons: []
+		, order: [[ 1, "desc" ]]
+	});
+});
+</script>
+
 <!-- InstanceEndEditable -->
 </body>
 
