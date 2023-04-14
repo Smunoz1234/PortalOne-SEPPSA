@@ -127,29 +127,48 @@ if ($sw == 1) {
 	}
 
 	function BorrarLineas() {
-		console.log(json);
+		Swal.fire({
+			title: "¿Está seguro que desea eliminar los registros seleccionados?",
+			icon: "question",
+			showCancelButton: true,
+			confirmButtonText: "Si, confirmo",
+			cancelButtonText: "No"
+		}).then((result) => {
+			if (result.isConfirmed) {
+				console.log(json);
 
-		// Obtener una referencia a la tabla DataTables
-		let miTabla = $('#miTabla').DataTable();
+				// Obtener una referencia a la tabla DataTables
+				let miTabla = $('#miTabla').DataTable();
 
-		// Obtener la filas que se desea eliminar
-		let filasEliminar = [];
+				// Obtener la filas que se desea eliminar
+				let filasEliminar = [];
 
-		json.forEach(linea => {
-			let fila = miTabla.row(`#line${linea}`);
-			let indice = fila.index();
+				json.forEach(linea => {
+					let fila = miTabla.row(`#line${linea}`);
+					let indice = fila.index();
 
-			// Agregar el indice a la lista
-			filasEliminar.push(indice);
-		});
+					// Agregar el indice a la lista
+					filasEliminar.push(indice);
+				});
 
-		// Eliminar las filas de la tabla
-		// console.log(filasEliminar);
-		miTabla.rows(filasEliminar).remove().draw();
+				// Eliminar las filas de la tabla
+				// console.log(filasEliminar);
+				miTabla.rows(filasEliminar).remove().draw();
 
-		// Restablecer arreglo
-		json = [];
-		cant = 0;
+				// Restablecer arreglo
+				json = [];
+				cant = 0;
+
+				// Mensaje final
+				Swal.fire({
+					title: "¡Listo!",
+					text: "Registros eliminados exitosamente.",
+					icon: "success"
+				});
+			} else {
+				console.log("No se confirmo la eliminación.")
+			}
+		}); // Swal
 	}
 </script>
 
@@ -232,12 +251,12 @@ if ($sw == 1) {
 								</div>
 
 								<div class="form-group">
-									<label class="col-lg-1 control-label">ID</label>
+									<label class="col-lg-2 control-label">ID</label>
 									<div class="col-lg-3">
 										<input name="ID" type="text" class="form-control" id="ID" value="<?php echo $_GET['ID'] ?? ""; ?>" readonly>
 									</div>
 
-									<div class="col-lg-4"></div>
+									<div class="col-lg-3"></div>
 
 									<div class="col-lg-4">
 										<button type="button" class="btn btn-outline btn-warning" id="Guardar"><i class="fa fa-save"></i> Guardar</button>
@@ -245,9 +264,9 @@ if ($sw == 1) {
 								</div>
 
 								<div class="form-group">
-									<label class="col-lg-1 control-label">Descripción</label>
-									<div class="col-lg-7">
-										<textarea name="descripcion" id="descripcion" rows="5" cols="100" maxlength="250"></textarea>
+									<label class="col-lg-2 control-label">Descripción <span class="text-danger">*</span></label>
+									<div class="col-lg-6">
+										<textarea name="descripcion" id="descripcion" rows="5" cols="70" maxlength="250"></textarea>
 									</div>
 
 									<div class="col-lg-4">
@@ -359,7 +378,7 @@ if ($sw == 1) {
 
 <script>
 $(document).ready(function(){
-	$("#Guardar").on('click', function() {
+	function GuardarLineas() {
 		let descripcion = $("#descripcion").val();
 		let id_proveedor = $("#Cliente").val();
 		let proveedor = $("#NombreCliente").val();
@@ -385,6 +404,12 @@ $(document).ready(function(){
 
 			// Definir la expresión regular para buscar las direcciones de correo electrónico
 			let regexCorreo = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+			let correos = rowData[10].match(regexCorreo);
+
+			// console.log(correos);
+			let textoCorreos = (correos === null) ? "":correos.join(";");
+			// Hay registros que no tienen y/o no cumplen con correos válidos.
+			// Verificar las filas con núm. factura proveedor: []
 
 			let rowObj = {
 				id_proveedor: datos_proveedor[0],
@@ -403,7 +428,7 @@ $(document).ready(function(){
 				valor_pago_cheque: valor_pago_cheque,
 				id_contacto: "",
 				contacto: "",
-				lista_correo_electronico_envio: rowData[10].match(regexCorreo).join(';')
+				lista_correo_electronico_envio: textoCorreos
 			};
 
 			jsonData.push(rowObj);
@@ -439,9 +464,33 @@ $(document).ready(function(){
 				}
 			},
 			error: function(error) {
-				console.error("Guardar", error.responseText);
+				console.error("GuardarLineas", error.responseText);
 			}
-		});
+		}); // ajax
+	}
+
+	$("#Guardar").on('click', function() {
+		if($("#descripcion").val() != "") {
+			Swal.fire({
+				title: "¿Está seguro que desea continuar con el guardado?",
+				icon: "question",
+				showCancelButton: true,
+				confirmButtonText: "Si, confirmo",
+				cancelButtonText: "No"
+			}).then((result) => {
+				if (result.isConfirmed) {
+					GuardarLineas();
+				} else {
+					console.log("No se confirmo la eliminación.")
+				}
+			}); // Swal
+		} else {
+			Swal.fire({
+				title: "¡Advertencia!",
+				text: "Debe agregar una descripción.",
+				icon: "warning"
+			});
+		}
 	});
 
 	$("#formBuscar").validate({
@@ -466,6 +515,7 @@ $(document).ready(function(){
 	});
 
 	$('.chosen-select').chosen({width: "100%"});
+	maxLength('descripcion');
 
 	let options = {
 		url: function(phrase) {
