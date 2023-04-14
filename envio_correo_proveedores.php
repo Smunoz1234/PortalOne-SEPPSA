@@ -393,11 +393,11 @@ $(document).ready(function(){
 				numero_factura_SAPB1: rowData[3],
 				fecha_factura: rowData[4],
 				fecha_vencimiento_factura: rowData[5],
-				valor_factura: rowData[6],
+				valor_factura: parseFloat(rowData[6].replace(',', '')),
 				numero_pago: rowData[7],
 				fecha_pago: rowData[8],
 				valor_pago: valor_pago,
-				valor_pago_tranferencia: valor_pago_transferencia,
+				valor_pago_transferencia: valor_pago_transferencia,
 				valor_pago_efectivo: valor_pago_efectivo,
 				numero_cheque: numero_cheque,
 				valor_pago_cheque: valor_pago_cheque,
@@ -409,9 +409,9 @@ $(document).ready(function(){
 			jsonData.push(rowObj);
 		});
 
-		console.log(jsonData);
+		// Imprimir JSON detalle
+		// console.log(jsonData);
 
-		/*
 		$.ajax({
 			url: "envio_correo_proveedores_ws.php",
 			method: "POST",
@@ -421,6 +421,7 @@ $(document).ready(function(){
 				proveedor: proveedor,
 				fecha_inicial: fecha_inicial,
 				fecha_final: fecha_final,
+				json_detalle: JSON.stringify(jsonData)
 			},
 			success: function(response) {
 				if(response == "OK") {
@@ -441,7 +442,6 @@ $(document).ready(function(){
 				console.error("Guardar", error.responseText);
 			}
 		});
-		*/
 	});
 
 	$("#formBuscar").validate({

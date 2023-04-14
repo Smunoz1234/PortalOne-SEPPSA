@@ -397,8 +397,8 @@ $Num_Menu = sqlsrv_num_rows($SQL_Menu);
 						<li>
 							<a href="#">Asistentes <span class="fa arrow"></span></a>
 							<ul class='nav nav-third-level'>
-								<?php if (true) {?><li><a class="alnk" href="envio_correo_clientes.php">Envío correo a clientes</a></li><?php }?>
-								<?php if (true) {?><li><a class="alnk" href="envio_correo_proveedores.php">Envío correo a proveedores</a></li><?php }?>
+								<?php if (true) {?><li><a class="alnk" href="consultar_envio_correo_clientes.php">Envío correo a clientes</a></li><?php }?>
+								<?php if (true) {?><li><a class="alnk" href="consultar_envio_correo_proveedores.php">Envío correo a proveedores</a></li><?php }?>
 							</ul>
 						</li>
 						<?php }?>
