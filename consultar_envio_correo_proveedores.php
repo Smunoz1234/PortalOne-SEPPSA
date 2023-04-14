@@ -1,54 +1,47 @@
 <?php
 require_once "includes/conexion.php";
-PermitirAcceso(1707);
-
+PermitirAcceso(601);
 $sw = 0;
-//Fechas
+
+// AGREGAR FILTRO DE PROVEEDOR
+$Proveedor = "";
+if (isset($_GET['Cliente']) && $_GET['Cliente'] != "") {
+    $Proveedor = $_GET['Cliente'];
+    $sw = 1;
+}
+
+// AGREGAR FILTROS DE FECHA DE PAGO
+$FechaInicial = "";
+$FechaFinal = "";
 if (isset($_GET['FechaInicial']) && $_GET['FechaInicial'] != "") {
     $FechaInicial = $_GET['FechaInicial'];
     $sw = 1;
 } else {
-    //Restar 7 dias a la fecha actual
-    $fecha = date('Y-m-d');
-    $nuevafecha = strtotime('-' . ObtenerVariable("DiasRangoFechasGestionar") . ' day');
-    $nuevafecha = date('Y-m-d', $nuevafecha);
-    $FechaInicial = $nuevafecha;
+    // Restar "n" días a la fecha actual.
+    $nuevaFecha = strtotime('-' . ObtenerVariable("DiasRangoFechasGestionar") . ' day');
+    $nuevaFecha = date('Y-m-d', $nuevaFecha);
+
+    // SMM, 11/04/2023
+    $FechaInicial = $nuevaFecha;
 }
 if (isset($_GET['FechaFinal']) && $_GET['FechaFinal'] != "") {
     $FechaFinal = $_GET['FechaFinal'];
     $sw = 1;
 } else {
+    // SMM, 11/04/2023
     $FechaFinal = date('Y-m-d');
 }
 
-//Filtros
-$Cliente = isset($_GET['Cliente']) ? $_GET['Cliente'] : "";
-$Sucursal = isset($_GET['Sucursal']) ? $_GET['Sucursal'] : "";
-$Estado = isset($_GET['Estado']) ? $_GET['Estado'] : "";
-$Empleado = isset($_GET['Empleado']) ? implode(",", $_GET['Empleado']) : "";
-$Supervisor = "";
-
 if ($sw == 1) {
-    $Param = array(
-        "'" . FormatoFecha($FechaInicial) . "'",
-        "'" . FormatoFecha($FechaFinal) . "'",
-        "'" . $Cliente . "'",
-        "'" . $Sucursal . "'",
-        "'" . $Estado . "'",
-        "'" . $Empleado . "'",
-        "'" . $Supervisor . "'",
-    );
-    $SQL = EjecutarSP('sp_ConsultarFormRecepcionVehiculos', $Param);
+    $Cliente = $_GET["Cliente"] ?? "";
+    $WhereCliente = ($Cliente != "") ? "AND id_proveedor = '$Cliente'" : "";
+
+    $WhereFecha = "(fecha_registro BETWEEN '$FechaInicial' AND '$FechaFinal')";
+    $Cons = "SELECT * FROM tbl_PagosProveedores_Correos WHERE $WhereFecha $WhereCliente";
+
+    // echo $Cons;
+    $SQL = sqlsrv_query($conexion, $Cons);
 }
-
-//Estado
-$SQL_EstadoFrm = Seleccionar('tbl_EstadoFormulario', '*');
-
-//Empleados
-$SQL_Empleados = Seleccionar('uvw_Sap_tbl_Empleados', 'ID_Empleado, NombreEmpleado', '', 'NombreEmpleado');
-
-//Supervisor
-$SQL_Supervisor = Seleccionar('uvw_tbl_RecepcionVehiculos', 'DISTINCT id_empleado_supervisor, empleado_supervisor', '', 'empleado_supervisor');
 ?>
 
 <!DOCTYPE html>
@@ -57,7 +50,7 @@ $SQL_Supervisor = Seleccionar('uvw_tbl_RecepcionVehiculos', 'DISTINCT id_emplead
 <head>
 <?php include_once "includes/cabecera.php";?>
 <!-- InstanceBeginEditable name="doctitle" -->
-<title>Recepción de vehículos</title>
+<title>Consultar envios de correo a proveedores</title>
 <!-- InstanceEndEditable -->
 <!-- InstanceBeginEditable name="head" -->
 <script type="text/javascript">
@@ -162,23 +155,26 @@ function SeleccionarTodos(){
         <!-- InstanceBeginEditable name="Contenido" -->
         <div class="row wrapper border-bottom white-bg page-heading">
                 <div class="col-sm-8">
-                    <h2>Recepción de vehículos</h2>
+                    <h2>Consultar envios de correo a proveedores</h2>
                     <ol class="breadcrumb">
                         <li>
                             <a href="index1.php">Inicio</a>
                         </li>
                         <li>
-                            <a href="#">Formularios</a>
+                            <a href="#">Proveedores</a>
+                        </li>
+						<li>
+                            <a href="#">Asistentes</a>
                         </li>
                         <li class="active">
-                            <strong>Recepción de vehículos</strong>
+                            <strong>Consultar envios de correo a proveedores</strong>
                         </li>
                     </ol>
 				</div>
-				<?php if (PermitirFuncion(1706)) {?>
+				<?php if (PermitirFuncion(601)) {?>
                 <div class="col-sm-4">
 					<div class="title-action">
-						<a href="frm_recepcion_vehiculo.php" class="alkin btn btn-primary"><i class="fa fa-plus-circle"></i> Crear nueva recepción de vehículo</a>
+						<a href="envio_correo_proveedores.php" class="alkin btn btn-primary"><i class="fa fa-plus-circle"></i> Crear nuevo envio de correo a proveedores</a>
 					</div>
 				</div>
 				<?php }?>
@@ -195,7 +191,7 @@ function SeleccionarTodos(){
 				<div class="col-lg-12">
 			    <div class="ibox-content">
 					 <?php include "includes/spinner.php";?>
-				  <form action="consultar_frm_recepcion_vehiculo.php" method="get" id="formBuscar" class="form-horizontal">
+				  <form action="consultar_envio_correo_proveedores.php" method="get" id="formBuscar" class="form-horizontal">
 					  	<div class="form-group">
 							<label class="col-xs-12"><h3 class="bg-success p-xs b-r-sm"><i class="fa fa-filter"></i> Datos para filtrar</h3></label>
 						</div>
@@ -208,58 +204,19 @@ function SeleccionarTodos(){
 									<input name="FechaFinal" type="text" class="input-sm form-control" id="FechaFinal" placeholder="Fecha final" value="<?php echo $FechaFinal; ?>" autocomplete="off" />
 								</div>
 							</div>
-							<label class="col-lg-1 control-label">Cliente</label>
+
+							<label class="col-lg-1 control-label">Proveedor</label>
 							<div class="col-lg-3">
 								<input name="Cliente" type="hidden" id="Cliente" value="<?php if (isset($_GET['Cliente']) && ($_GET['Cliente'] != "")) {echo $_GET['Cliente'];}?>">
 								<input name="NombreCliente" type="text" class="form-control" id="NombreCliente" placeholder="Para TODOS, dejar vacio..." value="<?php if (isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['NombreCliente'];}?>">
 							</div>
-							<label class="col-lg-1 control-label">Sucursal</label>
-							<div class="col-lg-3">
-							 <select id="Sucursal" name="Sucursal" class="form-control select2">
-								<option value="">(Todos)</option>
-								<?php
-if (isset($_GET['Cliente']) && ($_GET['Cliente'] != "")) { //Cuando se ha seleccionado una opción
-    if (PermitirFuncion(205)) {
-        $Where = "CodigoCliente='" . $_GET['Cliente'] . "'";
-        $SQL_Sucursal = Seleccionar("uvw_Sap_tbl_Clientes_Sucursales", "NombreSucursal, NumeroLinea", $Where);
-    } else {
-        $Where = "CodigoCliente='" . $_GET['Cliente'] . "' and ID_Usuario = " . $_SESSION['CodUser'];
-        $SQL_Sucursal = Seleccionar("uvw_tbl_SucursalesClienteUsuario", "NombreSucursal, NumeroLinea", $Where);
-    }
-    while ($row_Sucursal = sqlsrv_fetch_array($SQL_Sucursal)) {?>
-										<option value="<?php echo $row_Sucursal['NumeroLinea']; ?>" <?php if (strcmp($row_Sucursal['NumeroLinea'], $_GET['Sucursal']) == 0) {echo "selected=\"selected\"";}?>><?php echo $row_Sucursal['NombreSucursal']; ?></option>
-								<?php }
-}?>
-							</select>
-							</div>
-						</div>
-					  	<div class="form-group">
-							<label class="col-lg-1 control-label">Estado</label>
-							<div class="col-lg-3">
-								<select name="Estado" class="form-control" id="Estado">
-										<option value="">(Todos)</option>
-								  <?php while ($row_EstadoFrm = sqlsrv_fetch_array($SQL_EstadoFrm)) {?>
-										<option value="<?php echo $row_EstadoFrm['Cod_Estado']; ?>" <?php if ((isset($_GET['Estado'])) && (strcmp($row_EstadoFrm['Cod_Estado'], $_GET['Estado']) == 0)) {echo "selected=\"selected\"";}?>><?php echo $row_EstadoFrm['NombreEstado']; ?></option>
-								  <?php }?>
-								</select>
-							</div>
-							<label class="col-lg-1 control-label">Empleado</label>
-							<div class="col-lg-3">
-								<select data-placeholder="(Todos)" name="Empleado[]" class="form-control select2" id="Empleado" multiple>
-								  <?php $j = 0;
-while ($row_Empleados = sqlsrv_fetch_array($SQL_Empleados)) {?>
-										<option value="<?php echo $row_Empleados['ID_Empleado']; ?>" <?php if ((isset($_GET['Empleado'][$j]) && ($_GET['Empleado'][$j] != "")) && (strcmp($row_Empleados['ID_Empleado'], $_GET['Empleado'][$j]) == 0)) {echo "selected=\"selected\"";
-    $j++;}?>><?php echo $row_Empleados['NombreEmpleado']; ?></option>
-								  <?php }?>
-								</select>
-							</div>
-						</div>
-					  	<div class="form-group">
+
 							<div class="col-lg-4 pull-right">
 								<button type="submit" class="btn btn-outline btn-success pull-right"><i class="fa fa-search"></i> Buscar</button>
 							</div>
 						</div>
-					  	<?php if ($sw == 1) {?>
+
+					  	<?php if ($sw == 1 && false) {?>
 					  	<div class="form-group">
 							<div class="col-lg-10">
 								<a href="exportar_excel.php?exp=10&Cons=<?php echo base64_encode(implode(",", $Param)); ?>&sp=<?php echo base64_encode("sp_ConsultarFormRecepcionVehiculos"); ?>">
@@ -277,74 +234,35 @@ while ($row_Empleados = sqlsrv_fetch_array($SQL_Empleados)) {?>
 		<div class="row">
            <div class="col-lg-12">
 			    <div class="ibox-content">
-					 <?php include "includes/spinner.php";?>
-					<div class="row m-b-md">
-						<div class="col-lg-12">
-							<button class="pull-right btn btn-success" id="btnCambiarLote" name="btnCambiarLote" onClick="CambiarEstado('',true);" disabled><i class="fa fa-pencil"></i> Cambiar estados en lote</button>
+					<?php include "includes/spinner.php";?>
+
+					<?php if (false) {?>
+						<div class="row m-b-md">
+							<div class="col-lg-12">
+								<button class="pull-right btn btn-success" id="btnCambiarLote" name="btnCambiarLote" onClick="CambiarEstado('',true);" disabled><i class="fa fa-pencil"></i> Cambiar estados en lote</button>
+							</div>
 						</div>
-					</div>
+					<?php }?>
+
 					<div class="table-responsive">
 							<table class="table table-striped table-bordered table-hover dataTables-example" >
 							<thead>
 							<tr>
 								<th>ID</th>
-								<th>Empleado</th>
-								<th>Cliente</th>
-								<th>Sucursal</th>
-								<th>Placa</th>
-								<th>Comentarios cierre</th>
-								<th>Fecha creación</th>
-								<th>Usuario creación</th>
-								<th>Fecha cierre</th>
-								<th>Usuario cierre</th>
-								<th>App</th>
-								<th>Estado</th>
-								<th>Acciones</th>
-								<th class="text-center"><div class="checkbox checkbox-success"><input type="checkbox" id="chkAll" value="" onChange="SeleccionarTodos();" title="Seleccionar todos"><label></label></div></th>
+								<th>Proveedor</th>
+								<th>Fecha Creación</th>
+								<th>Descripción</th>
 							</tr>
 							</thead>
 							<tbody>
-							<?php while ($row = sqlsrv_fetch_array($SQL)) {?>
-
-								<?php $SQL_Formulario = Seleccionar('uvw_tbl_LlamadasServicios_Formularios', '*', "nombre_servicio = 'RecepcionVehiculos' AND id_formulario='" . $row['id_recepcion_vehiculo'] . "'");?>
-								<?php $row_Formulario = sqlsrv_fetch_array($SQL_Formulario);?>
-
-								<tr id="tr_Resum<?php echo $row['id_recepcion_vehiculo']; ?>" class="trResum">
-									<td><?php echo $row['id_recepcion_vehiculo']; ?></td>
-									<td><?php echo $row['empleado_tecnico']; ?></td>
-									<td><?php echo $row['socio_negocio']; ?></td>
-									<td><?php echo $row['id_direccion_destino']; ?></td>
-									<td><?php echo $row['placa']; ?></td>
-									<td><?php echo $row['comentarios_cierre']; ?></td>
-									<td><?php echo $row['hora_creacion']->format('Y-m-d H:i'); ?></td>
-									<td><?php echo $row['nombre_usuario_creacion']; ?></td>
-									<td><?php echo ($row['fecha_cierre'] != "") ? $row['fecha_cierre']->format('Y-m-d H:i') : ""; ?></td>
-									<td><?php echo $row['nombre_usuario_cierre']; ?></td>
-									<td><?php echo $row['app'] ?? ""; ?></td>
-									<td><span id="lblEstado<?php echo $row['id_recepcion_vehiculo']; ?>" <?php if ($row['estado'] == 'O') {echo "class='label label-info'";} elseif ($row['estado'] == 'A') {echo "class='label label-danger'";} else {echo "class='label label-primary'";}?>><?php echo $row['nombre_estado']; ?></span></td>
-									<td class="text-center form-inline w-80">
-										<?php if ($row['estado'] == 'O') {?>
-											<button id="btnEstado<?php echo $row['id_recepcion_vehiculo']; ?>" class="btn btn-success btn-xs" onClick="CambiarEstado('<?php echo $row['id_recepcion_vehiculo']; ?>');" title="Cambiar estado"><i class="fa fa-pencil"></i></button>
-										<?php }?>
-
-										<a href="filedownload.php?file=<?php echo base64_encode("RecepcionVehiculos/DescargarFormatos/" . $row['id_recepcion_vehiculo'] . "/" . $_SESSION['User']); ?>&api=1" target="_blank" class="btn btn-warning btn-xs" title="Descargar"><i class="fa fa-download"></i></a>
-
-										<a href="descargar_frm_recepcion_vehiculo.php?id=<?php echo $row['id_recepcion_vehiculo']; ?>" target="_blank" class="btn btn-danger btn-xs" title="Descargar Fotos"><i class="fa fa-file-image-o"></i></a>
-
-										<?php if (isset($row_Formulario['docentry_llamada_servicio']) && ($row_Formulario['docentry_llamada_servicio'] != "")) {?>
-											<br><br>
-											<a target="_blank" title="Abrir OT" href="llamada_servicio.php?id=<?php echo base64_encode($row_Formulario['docentry_llamada_servicio']); ?>&tl=1&return=<?php echo base64_encode($_SERVER['QUERY_STRING']); ?>&pag=<?php echo base64_encode('consultar_frm_recepcion_vehiculo.php'); ?>" class="btn btn-info btn-xs"><i class="fa fa-folder-open-o"></i> <?php echo $row_Formulario['id_llamada_servicio']; ?></a>
-										<?php }?>
-									</td>
-									<td class="text-center">
-										<?php if ($row['estado'] == 'O') {?>
-										<div class="checkbox checkbox-success" id="dvChkSel<?php echo $row['id_recepcion_vehiculo']; ?>">
-											<input type="checkbox" class="chkSelOT" id="chkSelOT<?php echo $row['id_recepcion_vehiculo']; ?>" value="" onChange="SeleccionarOT('<?php echo $row['id_recepcion_vehiculo']; ?>');" aria-label="Single checkbox One"><label></label>
-										</div>
-										<?php }?>
-									</td>
-								</tr>
-							<?php }?>
+								<?php while ($row = sqlsrv_fetch_array($SQL)) {?>
+									<tr class="odd gradeX line" >
+										<td><?php echo $row['id']; ?></td>
+										<td><?php echo $row['id_proveedor'] . " - " . $row['proveedor']; ?></td>
+										<td><?php if ($row['fecha_creacion'] != "") {echo $row['fecha_creacion']->format('Y-m-d');} else {echo "--";}?></td>
+										<td><?php echo $row['descripcion']; ?></td>
+									</tr>
+								<?php }?>
 							</tbody>
 							</table>
 					  </div>
@@ -395,7 +313,7 @@ while ($row_Empleados = sqlsrv_fetch_array($SQL_Empleados)) {?>
 
 			var options = {
 				url: function(phrase) {
-					return "ajx_buscar_datos_json.php?type=7&id="+phrase;
+					return "ajx_buscar_datos_json.php?type=7&id="+phrase+"&pv=1";
 				},
 
 				getValue: "NombreBuscarCliente",
