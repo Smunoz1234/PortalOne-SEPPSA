@@ -390,6 +390,10 @@ $(document).ready(function(){
 		let data = table.rows().data();
 
 		// Armar el objeto JSON
+		let errorID = false;
+		let errorCorreos = false;
+		let filasErroneas = [];
+
 		let jsonData = [];
 		data.each(function(rowData) {
 			let datos_proveedor = rowData[1].split(" - ");
@@ -406,16 +410,27 @@ $(document).ready(function(){
 			let regexCorreo = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 			let correos = rowData[10].match(regexCorreo);
 
-			// console.log(correos);
-			let textoCorreos = (correos === null) ? "":correos.join(";");
-			// Hay registros que no tienen y/o no cumplen con correos válidos.
-			// Verificar las filas con núm. factura proveedor: []
+			// Número de factura actual
+			let facturaSAP = rowData[3];
+			if(facturaSAP === "") {
+				errorID = true;
+			}
+
+			let textoCorreos = "";
+			if(correos !== null) {
+				textoCorreos = correos.join(";");
+			} else {
+				errorCorreos = true;
+				// console.log(correos);
+
+				filasErroneas.push(facturaSAP);
+			}
 
 			let rowObj = {
 				id_proveedor: datos_proveedor[0],
 				proveedor: datos_proveedor[1],
 				numero_factura_proveedor: rowData[2],
-				numero_factura_SAPB1: rowData[3],
+				numero_factura_SAPB1: facturaSAP,
 				fecha_factura: rowData[4],
 				fecha_vencimiento_factura: rowData[5],
 				valor_factura: parseFloat(rowData[6].replace(',', '')),
@@ -437,36 +452,58 @@ $(document).ready(function(){
 		// Imprimir JSON detalle
 		// console.log(jsonData);
 
-		$.ajax({
-			url: "envio_correo_proveedores_ws.php",
-			method: "POST",
-			data: {
-				descripcion: descripcion,
-				id_proveedor: id_proveedor,
-				proveedor: proveedor,
-				fecha_inicial: fecha_inicial,
-				fecha_final: fecha_final,
-				json_detalle: JSON.stringify(jsonData)
-			},
-			success: function(response) {
-				if(response == "OK") {
-					Swal.fire({
-						title: "¡Listo!",
-						text: "Procedimiento ejecutado exitosamente.",
-						icon: "success"
-					});
-				} else {
-					Swal.fire({
-						title: "¡Ha ocurrido un error!",
-						text: response,
-						icon: "error"
-					});
+		if(errorID) {
+			Swal.fire({
+				title: "¡Advertencia!",
+				text: "Todas los registros deben tener Núm. Factura SAP B1. Por favor, verifique.",
+				icon: "warning"
+			});
+		}
+
+		if(errorCorreos) {
+			let msjFilasErroneas = `Verificar las filas con Núm. Factura SAP B1: ${filasErroneas.join(";")}`;
+
+			Swal.fire({
+				title: "¡Advertencia!",
+				text: `Algunos de los registros presentan inconsistencias con los correos. ${msjFilasErroneas}`,
+				icon: "warning"
+			});
+		}
+
+		if(!errorID && !errorCorreos) {
+			$.ajax({
+				url: "envio_correo_proveedores_ws.php",
+				method: "POST",
+				data: {
+					descripcion: descripcion,
+					id_proveedor: id_proveedor,
+					proveedor: proveedor,
+					fecha_inicial: fecha_inicial,
+					fecha_final: fecha_final,
+					json_detalle: JSON.stringify(jsonData)
+				},
+				success: function(response) {
+					if(response == "OK") {
+						Swal.fire({
+							title: "¡Listo!",
+							text: "Procedimiento ejecutado exitosamente.",
+							icon: "success"
+						}).then(function() {
+							window.location.href = "consultar_envio_correo_proveedores.php";
+						});
+					} else {
+						Swal.fire({
+							title: "¡Ha ocurrido un error!",
+							text: response,
+							icon: "error"
+						});
+					}
+				},
+				error: function(error) {
+					console.error("GuardarLineas", error.responseText);
 				}
-			},
-			error: function(error) {
-				console.error("GuardarLineas", error.responseText);
-			}
-		}); // ajax
+			}); // ajax
+		}
 	}
 
 	$("#Guardar").on('click', function() {
