@@ -54,13 +54,6 @@ if (isset($_GET['FF_Pago']) && $_GET['FF_Pago'] != "") {
     $FF_Pago = date('Y-m-d');
 }
 
-// AGREGAR FILTRO DE EGRESO
-$PagoEfectuado = "";
-if (isset($_GET['Egreso']) && $_GET['Egreso'] != "") {
-    $PagoEfectuado = $_GET['Egreso'];
-    $sw = 1;
-}
-
 if ($sw == 1) {
     $Param = array(
         "'" . $Cliente . "'",
@@ -68,7 +61,6 @@ if ($sw == 1) {
         "'" . FormatoFecha($FF_Registro) . "'",
         "'" . FormatoFecha($FI_Pago) . "'",
         "'" . FormatoFecha($FF_Pago) . "'",
-        "'" . $PagoEfectuado . "'",
     );
 
     $SQL = EjecutarSP($sp, $Param);
@@ -97,7 +89,6 @@ if ($id != "") {
     $Param = array(); // Solución conflicto exportar excel.
     $SQL = Seleccionar("tbl_PagosProveedores_Correos_Detalle", "*", "id=$id");
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -260,14 +251,14 @@ if ($id != "") {
 
 								<label class="col-lg-1 control-label">Número Egreso</label>
 								<div class="col-lg-3">
-									<input name="Egreso" type="text" class="form-control" id="Egreso" value="<?php if (isset($_GET['Egreso']) && ($_GET['Egreso'] != "")) {echo $_GET['Egreso'];}?>">
+									<input name="NumEgreso" type="text" class="form-control" id="NumEgreso" value="<?php if (isset($_GET['NumEgreso']) && ($_GET['NumEgreso'] != "")) {echo $_GET['NumEgreso'];}?>">
 								</div>
 							</div>
 
 							<div class="form-group">
 								<label class="col-lg-1 control-label">Proveedor</label>
 								<div class="col-lg-3">
-									<input name="Cliente" type="hidden" id="Cliente" value="<?php if (isset($_GET['Cliente']) && isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['Cliente'];} elseif ($id != "") {echo $id_proveedor;}?>">
+									<input name="Cliente" type="hidden" id="Cliente" value="<?php if (isset($_GET['Cliente']) && ($_GET['Cliente'] != "")) {echo $_GET['Cliente'];} elseif ($id != "") {echo $id_proveedor;}?>">
 									<input name="NombreCliente" type="text" class="form-control" id="NombreCliente" placeholder="Para TODOS, dejar vacio..." value="<?php if (isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['NombreCliente'];} elseif ($id != "") {echo $proveedor;}?>">
 								</div>
 
@@ -299,7 +290,7 @@ if ($id != "") {
 								<div class="form-group">
 									<label class="col-lg-2 control-label">Descripción <span class="text-danger">*</span></label>
 									<div class="col-lg-6">
-										<textarea name="descripcion" id="descripcion" rows="5" cols="70" maxlength="250"><?php if ($id != "") {echo $descripcion;}?></textarea>
+										<textarea name="descripcion" id="descripcion" rows="5" cols="70" maxlength="250"></textarea>
 									</div>
 
 									<div class="col-lg-4">
@@ -342,7 +333,7 @@ if ($id != "") {
 
 										<th>Correo electrónico</th>
 
-										<th>Contacto<th>
+										<th>Contacto</th>
 
 										<?php if (false) {?>
 											<th>Estado Envio</th>
@@ -384,7 +375,7 @@ if ($id != "") {
 												<?php }?>
 											</td>
 
-											<td><?php if (isset($row['contacto']) && ($row['contacto'] != "")) {echo $row['id_contacto'] . " - " . $row['contacto'];}?></td>
+											<td><?php echo $row['id_contacto'] . " - " . $row['contacto']; ?></td>
 
 											<?php if (false) {?>
 												<td>
@@ -417,7 +408,7 @@ if ($id != "") {
 $(document).ready(function(){
 	// SMM, 17/04/2023
 	<?php if ($id != "") {?>
-		$("input").prop("disabled", true);
+		$("input").prop("readonly", true);
 		$("button").prop("disabled", true);
 
 		$("a").attr("disabled", true);
@@ -622,7 +613,7 @@ $(document).ready(function(){
 
 	$('.dataTables-example').DataTable({
 		pageLength: 10,
-		responsive: false,
+		responsive: true,
 		dom: '<"html5buttons"B>lTfgitp',
 		language: {
 			"decimal":        "",
