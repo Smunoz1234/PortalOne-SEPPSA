@@ -54,6 +54,13 @@ if (isset($_GET['FF_Pago']) && $_GET['FF_Pago'] != "") {
     $FF_Pago = date('Y-m-d');
 }
 
+// AGREGAR FILTRO DE PROVEEDOR
+$PagoEfectuado = "";
+if (isset($_GET['Egreso']) && $_GET['Egreso'] != "") {
+    $PagoEfectuado = $_GET['Egreso'];
+    $sw = 1;
+}
+
 if ($sw == 1) {
     $Param = array(
         "'" . $Cliente . "'",
@@ -61,6 +68,7 @@ if ($sw == 1) {
         "'" . FormatoFecha($FF_Registro) . "'",
         "'" . FormatoFecha($FI_Pago) . "'",
         "'" . FormatoFecha($FF_Pago) . "'",
+        "'" . $PagoEfectuado . "'",
     );
 
     $SQL = EjecutarSP($sp, $Param);
@@ -251,14 +259,14 @@ if ($id != "") {
 
 								<label class="col-lg-1 control-label">Número Egreso</label>
 								<div class="col-lg-3">
-									<input name="NumEgreso" type="text" class="form-control" id="NumEgreso" value="<?php if (isset($_GET['NumEgreso']) && ($_GET['NumEgreso'] != "")) {echo $_GET['NumEgreso'];}?>">
+									<input name="Egreso" type="text" class="form-control" id="Egreso" value="<?php if (isset($_GET['Egreso']) && ($_GET['Egreso'] != "")) {echo $_GET['Egreso'];}?>">
 								</div>
 							</div>
 
 							<div class="form-group">
 								<label class="col-lg-1 control-label">Proveedor</label>
 								<div class="col-lg-3">
-									<input name="Cliente" type="hidden" id="Cliente" value="<?php if (isset($_GET['Cliente']) && ($_GET['Cliente'] != "")) {echo $_GET['Cliente'];} elseif ($id != "") {echo $id_proveedor;}?>">
+									<input name="Cliente" type="hidden" id="Cliente" value="<?php if (isset($_GET['Cliente']) && isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['Cliente'];} elseif ($id != "") {echo $id_proveedor;}?>">
 									<input name="NombreCliente" type="text" class="form-control" id="NombreCliente" placeholder="Para TODOS, dejar vacio..." value="<?php if (isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['NombreCliente'];} elseif ($id != "") {echo $proveedor;}?>">
 								</div>
 
@@ -375,7 +383,7 @@ if ($id != "") {
 												<?php }?>
 											</td>
 
-											<td><?php echo $row['id_contacto'] . " - " . $row['contacto']; ?></td>
+											<td><?php if (isset($row['contacto']) && ($row['contacto'] != "")) {echo $row['id_contacto'] . " - " . $row['contacto'];}?></td>
 
 											<?php if (false) {?>
 												<td>
@@ -613,7 +621,7 @@ $(document).ready(function(){
 
 	$('.dataTables-example').DataTable({
 		pageLength: 10,
-		responsive: true,
+		responsive: false,
 		dom: '<"html5buttons"B>lTfgitp',
 		language: {
 			"decimal":        "",
