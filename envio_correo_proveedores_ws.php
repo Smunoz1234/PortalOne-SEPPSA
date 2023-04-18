@@ -60,7 +60,7 @@ foreach ($lineas as &$linea) {
         "'" . $linea->valor_pago . "'",
         "'" . $linea->valor_pago_transferencia . "'",
         "'" . $linea->valor_pago_efectivo . "'",
-        "'" . $linea->numero_cheque . "'",
+        "'" . $linea->numero_cheque . "'", // Cuando esta vacio llega "--"
         "'" . $linea->valor_pago_cheque . "'",
         "'" . $linea->id_contacto . "'",
         "'" . $linea->contacto . "'",

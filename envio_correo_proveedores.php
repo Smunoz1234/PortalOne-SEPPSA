@@ -94,9 +94,24 @@ if ($id != "") {
     $descripcion = $row_Encabezado["descripcion"];
 
     // Cuerpo o detalle.
-    $Param = array(); // Solución conflicto exportar excel.
-    $SQL = Seleccionar("tbl_PagosProveedores_Correos_Detalle", "*", "id=$id");
+    $Cons = "SELECT * FROM tbl_PagosProveedores_Correos_Detalle WHERE id=$id";
+    $SQL = sqlsrv_query($conexion, $Cons);
 }
+
+// Obtener la ruta para exportar a Excel.
+$rutaExcel = "";
+if ($id == "") {
+    $encodeParam = base64_encode(implode(",", $Param));
+    $encodeSP = base64_encode($sp);
+
+    $rutaExcel = "exportar_excel.php?exp=10&Cons=$encodeParam&sp=$encodeSP";
+} else {
+    $encodeCons = base64_encode($Cons);
+    // echo $Cons;
+
+    $rutaExcel = "exportar_excel.php?exp=20&Cons=$encodeCons";
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -302,7 +317,7 @@ if ($id != "") {
 									</div>
 
 									<div class="col-lg-4">
-										<a class="btn btn-outline btn-info" href="exportar_excel.php?exp=10&Cons=<?php echo base64_encode(implode(",", $Param)); ?>&sp=<?php echo base64_encode($sp); ?>"><i class="fa fa-file-excel-o"></i> Exportar a Excel</a>
+										<a class="btn btn-outline btn-info" href="<?php echo $rutaExcel; ?>"><i class="fa fa-file-excel-o"></i> Exportar a Excel</a>
 									</div>
 								</div>
 							<?php }?>
@@ -343,7 +358,7 @@ if ($id != "") {
 
 										<th>Contacto</th>
 
-										<?php if (false) {?>
+										<?php if ($id != "") {?>
 											<th>Estado Envio</th>
 										<?php }?>
 									</tr>
@@ -385,10 +400,10 @@ if ($id != "") {
 
 											<td><?php if (isset($row['contacto']) && ($row['contacto'] != "")) {echo $row['id_contacto'] . " - " . $row['contacto'];}?></td>
 
-											<?php if (false) {?>
+											<?php if ($id != "") {?>
 												<td>
-													<br>Estado: <?php echo $row['estado_envio_correo']; ?>
-													<br>Mensaje: <?php echo $row['mensaje_envio']; ?>
+													<br>Estado: <?php echo $row['estado_envio_correo'] ?? "--"; ?>
+													<br>Mensaje: <?php echo $row['mensaje_envio'] ?? "--"; ?>
 												</td>
 											<?php }?>
 										</tr>
