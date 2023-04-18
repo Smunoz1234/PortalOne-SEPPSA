@@ -1,9 +1,9 @@
 <?php require_once "includes/conexion.php";
 PermitirAcceso(601);
 $sw = 0;
-$sp = 'sp_ConsultarPagosProveedores';
+$sp = 'sp_ConsultarPagosClientes';
 
-// AGREGAR FILTRO DE PROVEEDOR
+// AGREGAR FILTRO DE CLIENTE
 $Cliente = "";
 if (isset($_GET['Cliente']) && $_GET['Cliente'] != "") {
     $Cliente = $_GET['Cliente'];
@@ -54,7 +54,7 @@ if (isset($_GET['FF_Pago']) && $_GET['FF_Pago'] != "") {
     $FF_Pago = date('Y-m-d');
 }
 
-// AGREGAR FILTRO DE PROVEEDOR
+// AGREGAR FILTRO DE EGRESO
 $PagoEfectuado = "";
 if (isset($_GET['Egreso']) && $_GET['Egreso'] != "") {
     $PagoEfectuado = $_GET['Egreso'];
@@ -80,13 +80,13 @@ $id = $_GET["id"] ?? "";
 if ($id != "") {
     $sw = 1;
 
-    $SQL_Encabezado = Seleccionar("tbl_PagosProveedores_Correos", "*", "id=$id");
+    $SQL_Encabezado = Seleccionar("tbl_PagosClientes_Correos", "*", "id=$id");
     $row_Encabezado = sqlsrv_fetch_array($SQL_Encabezado);
 
     $fecha_inicial = $row_Encabezado["fecha_inicial"]->format('Y-m-d');
     $fecha_final = $row_Encabezado["fecha_final"]->format('Y-m-d');
-    $id_proveedor = $row_Encabezado["id_proveedor"];
-    $proveedor = $row_Encabezado["proveedor"];
+    $id_cliente = $row_Encabezado["id_cliente"];
+    $nombre_cliente = $row_Encabezado["cliente"];
 
     // No esta en la tabla actualmente.
     // $egreso_pago = $row_Encabezado["egreso_pago"];
@@ -94,7 +94,7 @@ if ($id != "") {
     $descripcion = $row_Encabezado["descripcion"];
 
     // Cuerpo o detalle.
-    $Cons = "SELECT * FROM tbl_PagosProveedores_Correos_Detalle WHERE id=$id";
+    $Cons = "SELECT * FROM tbl_PagosClientes_Correos_Detalle WHERE id=$id";
     $SQL = sqlsrv_query($conexion, $Cons);
 }
 
@@ -120,7 +120,7 @@ if (($sw == 1) && ($id == "")) {
 <head>
 <?php include_once "includes/cabecera.php";?>
 <!-- InstanceBeginEditable name="doctitle" -->
-<title>Envio correo a proveedores | <?php echo NOMBRE_PORTAL; ?></title>
+<title>Envio correo a clientes | <?php echo NOMBRE_PORTAL; ?></title>
 <!-- InstanceEndEditable -->
 <!-- InstanceBeginEditable name="head" -->
 
@@ -235,19 +235,19 @@ if (($sw == 1) && ($id == "")) {
         <!-- InstanceBeginEditable name="Contenido" -->
         <div class="row wrapper border-bottom white-bg page-heading">
                 <div class="col-sm-8">
-                    <h2>Envio correo a proveedores</h2>
+                    <h2>Envio correo a clientes</h2>
                     <ol class="breadcrumb">
                         <li>
                             <a href="index1.php">Inicio</a>
                         </li>
                         <li>
-                            <a href="#">Proveedores</a>
+                            <a href="#">Clientes</a>
                         </li>
 						<li>
                             <a href="#">Asistentes</a>
                         </li>
                         <li class="active">
-                            <strong>Envio correo a proveedores</strong>
+                            <strong>Envio correo a clientes</strong>
                         </li>
                     </ol>
                 </div>
@@ -257,7 +257,7 @@ if (($sw == 1) && ($id == "")) {
 				<div class="col-lg-12">
 					<div class="ibox-content">
 						 <?php include "includes/spinner.php";?>
-					  <form action="envio_correo_proveedores.php" method="get" id="formBuscar" class="form-horizontal">
+					  <form action="envio_correo_clientes.php" method="get" id="formBuscar" class="form-horizontal">
 							<div class="form-group">
 								<label class="col-xs-12"><h3 class="bg-success p-xs b-r-sm"><i class="fa fa-filter"></i> Datos para filtrar</h3></label>
 							</div>
@@ -279,10 +279,10 @@ if (($sw == 1) && ($id == "")) {
 							</div>
 
 							<div class="form-group">
-								<label class="col-lg-1 control-label">Proveedor</label>
+								<label class="col-lg-1 control-label">Cliente</label>
 								<div class="col-lg-3">
-									<input name="Cliente" type="hidden" id="Cliente" value="<?php if (isset($_GET['Cliente']) && isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['Cliente'];} elseif ($id != "") {echo $id_proveedor;}?>">
-									<input name="NombreCliente" type="text" class="form-control" id="NombreCliente" placeholder="Para TODOS, dejar vacio..." value="<?php if (isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['NombreCliente'];} elseif ($id != "") {echo $proveedor;}?>">
+									<input name="Cliente" type="hidden" id="Cliente" value="<?php if (isset($_GET['Cliente']) && isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['Cliente'];} elseif ($id != "") {echo $id_cliente;}?>">
+									<input name="NombreCliente" type="text" class="form-control" id="NombreCliente" placeholder="Para TODOS, dejar vacio..." value="<?php if (isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['NombreCliente'];} elseif ($id != "") {echo $nombre_cliente;}?>">
 								</div>
 
 								<div class="col-lg-4">
@@ -340,9 +340,9 @@ if (($sw == 1) && ($id == "")) {
 											<button type="button" id="btnBorrarLineas" title="Borrar lineas" class="btn btn-danger btn-xs" disabled onClick="BorrarLineas();"><i class="fa fa-trash"></i></button>
 										</th>
 
-										<th>Proveedor</th>
+										<th>Cliente</th>
 
-										<th>Núm. Factura Proveedor</th>
+										<th>Núm. Factura Cliente</th>
 										<th>Núm. Factura SAP B1</th>
 
 										<th>Fecha Factura</th>
@@ -372,9 +372,9 @@ if (($sw == 1) && ($id == "")) {
 												<div class="checkbox checkbox-success"><input type="checkbox" class="chkSel" id="chkSel<?php echo $cont; ?>" onChange="Seleccionar('<?php echo $cont; ?>');"><label></label></div>
 											</td>
 
-											<td><?php echo $row['id_proveedor'] . " - " . $row['proveedor']; ?></td>
+											<td><?php echo $row['id_cliente'] . " - " . $row['cliente']; ?></td>
 
-											<td><?php echo $row['numero_factura_proveedor']; ?></td>
+											<td><?php echo $row['numero_orden_cliente']; ?></td>
 											<td><?php echo $row['numero_factura_SAPB1']; ?></td>
 
 											<td><?php if ($row['fecha_factura'] != "") {echo $row['fecha_factura']->format('Y-m-d');} else {echo "--";}?></td>
@@ -438,8 +438,8 @@ $(document).ready(function(){
 
 	function GuardarLineas() {
 		let descripcion = $("#descripcion").val();
-		let id_proveedor = $("#Cliente").val();
-		let proveedor = $("#NombreCliente").val();
+		let id_cliente = $("#Cliente").val();
+		let cliente = $("#NombreCliente").val();
 		let fecha_inicial = $("#FI_Pago").val();
 		let fecha_final = $("#FF_Pago").val();
 
@@ -454,7 +454,7 @@ $(document).ready(function(){
 
 		let jsonData = [];
 		data.each(function(rowData) {
-			let datos_proveedor = rowData[1].split(" - ");
+			let datos_cliente = rowData[1].split(" - ");
 
 			// Buscar datos de pago
 			let datos_pago = rowData[9];
@@ -488,9 +488,9 @@ $(document).ready(function(){
 			let datos_contacto = rowData[11].split(" - ");
 
 			let rowObj = {
-				id_proveedor: datos_proveedor[0],
-				proveedor: datos_proveedor[1],
-				numero_factura_proveedor: rowData[2],
+				id_cliente: datos_cliente[0],
+				cliente: datos_cliente[1],
+				numero_factura_cliente: rowData[2],
 				numero_factura_SAPB1: facturaSAP,
 				fecha_factura: rowData[4],
 				fecha_vencimiento_factura: rowData[5],
@@ -533,12 +533,12 @@ $(document).ready(function(){
 
 		if(!errorID && !errorCorreos) {
 			$.ajax({
-				url: "envio_correo_proveedores_ws.php",
+				url: "envio_correo_clientes_ws.php",
 				method: "POST",
 				data: {
 					descripcion: descripcion,
-					id_proveedor: id_proveedor,
-					proveedor: proveedor,
+					id_cliente: id_cliente,
+					cliente: cliente,
 					fecha_inicial: fecha_inicial,
 					fecha_final: fecha_final,
 					json_detalle: JSON.stringify(jsonData)
@@ -550,7 +550,7 @@ $(document).ready(function(){
 							text: "Procedimiento ejecutado exitosamente.",
 							icon: "success"
 						}).then(function() {
-							window.location.href = "consultar_envio_correo_proveedores.php";
+							window.location.href = "consultar_envio_correo_clientes.php";
 						});
 					} else {
 						Swal.fire({

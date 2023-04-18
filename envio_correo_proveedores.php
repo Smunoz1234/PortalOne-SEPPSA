@@ -54,7 +54,7 @@ if (isset($_GET['FF_Pago']) && $_GET['FF_Pago'] != "") {
     $FF_Pago = date('Y-m-d');
 }
 
-// AGREGAR FILTRO DE PROVEEDOR
+// AGREGAR FILTRO DE EGRESO
 $PagoEfectuado = "";
 if (isset($_GET['Egreso']) && $_GET['Egreso'] != "") {
     $PagoEfectuado = $_GET['Egreso'];
@@ -63,7 +63,7 @@ if (isset($_GET['Egreso']) && $_GET['Egreso'] != "") {
 
 if ($sw == 1) {
     $Param = array(
-        "'" . $Cliente . "'",
+        "'" . $Cliente . "'", // Proveedor
         "'" . FormatoFecha($FI_Registro) . "'",
         "'" . FormatoFecha($FF_Registro) . "'",
         "'" . FormatoFecha($FI_Pago) . "'",
