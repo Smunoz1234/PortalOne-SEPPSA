@@ -100,12 +100,12 @@ if ($id != "") {
 
 // Obtener la ruta para exportar a Excel.
 $rutaExcel = "";
-if ($id == "") {
+if (($sw == 1) && ($id == "")) {
     $encodeParam = base64_encode(implode(",", $Param));
     $encodeSP = base64_encode($sp);
 
     $rutaExcel = "exportar_excel.php?exp=10&Cons=$encodeParam&sp=$encodeSP";
-} else {
+} elseif (($sw == 1) && ($id != "")) {
     $encodeCons = base64_encode($Cons);
     // echo $Cons;
 
