@@ -617,7 +617,7 @@ $(document).ready(function(){
 
 	let options = {
 		url: function(phrase) {
-			return "ajx_buscar_datos_json.php?type=7&id="+phrase+"&pv=1";
+			return "ajx_buscar_datos_json.php?type=7&id="+phrase;
 		},
 
 		getValue: "NombreBuscarCliente",
