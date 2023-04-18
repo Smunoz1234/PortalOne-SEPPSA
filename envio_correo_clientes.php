@@ -274,7 +274,7 @@ if (($sw == 1) && ($id == "")) {
 
 								<label class="col-lg-1 control-label">Número Egreso</label>
 								<div class="col-lg-3">
-									<input name="Egreso" type="text" class="form-control" id="Egreso" value="<?php if (isset($_GET['Egreso']) && ($_GET['Egreso'] != "")) {echo $_GET['Egreso'];}?>">
+									<input name="Egreso" type="number" class="form-control" id="Egreso" value="<?php if (isset($_GET['Egreso']) && ($_GET['Egreso'] != "")) {echo $_GET['Egreso'];}?>">
 								</div>
 							</div>
 
@@ -531,7 +531,19 @@ $(document).ready(function(){
 			});
 		}
 
-		if(!errorID && !errorCorreos) {
+		// SMM, 18/04/2023
+		let errorData = false;
+		if(data.length === 0) {
+			errorData = true;
+
+			Swal.fire({
+				title: "¡Advertencia!",
+				text: "No existen registros en la tabla, por favor verifique.",
+				icon: "warning"
+			});
+		}
+
+		if(!errorID && !errorCorreos && !errorData) {
 			$.ajax({
 				url: "envio_correo_clientes_ws.php",
 				method: "POST",
