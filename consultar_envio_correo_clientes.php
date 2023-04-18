@@ -3,10 +3,10 @@ require_once "includes/conexion.php";
 PermitirAcceso(601);
 $sw = 0;
 
-// AGREGAR FILTRO DE PROVEEDOR
-$Proveedor = "";
+// AGREGAR FILTRO DE CLIENTE
+$Cliente = "";
 if (isset($_GET['Cliente']) && $_GET['Cliente'] != "") {
-    $Proveedor = $_GET['Cliente'];
+    $Cliente = $_GET['Cliente'];
     $sw = 1;
 }
 
@@ -34,10 +34,10 @@ if (isset($_GET['FechaFinal']) && $_GET['FechaFinal'] != "") {
 
 if ($sw == 1) {
     $Cliente = $_GET["Cliente"] ?? "";
-    $WhereCliente = ($Cliente != "") ? "AND id_proveedor = '$Cliente'" : "";
+    $WhereCliente = ($Cliente != "") ? "AND id_cliente = '$Cliente'" : "";
 
     $WhereFecha = "(fecha_registro BETWEEN '$FechaInicial' AND '$FechaFinal')";
-    $Cons = "SELECT * FROM tbl_PagosProveedores_Correos WHERE $WhereFecha $WhereCliente";
+    $Cons = "SELECT * FROM tbl_PagosClientes_Correos WHERE $WhereFecha $WhereCliente";
 
     // echo $Cons;
     $SQL = sqlsrv_query($conexion, $Cons);
@@ -50,7 +50,7 @@ if ($sw == 1) {
 <head>
 <?php include_once "includes/cabecera.php";?>
 <!-- InstanceBeginEditable name="doctitle" -->
-<title>Consultar envios de correo a proveedores</title>
+<title>Consultar envios de correo a clientes</title>
 <!-- InstanceEndEditable -->
 <!-- InstanceBeginEditable name="head" -->
 <script type="text/javascript">
@@ -155,26 +155,26 @@ function SeleccionarTodos(){
         <!-- InstanceBeginEditable name="Contenido" -->
         <div class="row wrapper border-bottom white-bg page-heading">
                 <div class="col-sm-8">
-                    <h2>Consultar envios de correo a proveedores</h2>
+                    <h2>Consultar envios de correo a clientes</h2>
                     <ol class="breadcrumb">
                         <li>
                             <a href="index1.php">Inicio</a>
                         </li>
                         <li>
-                            <a href="#">Proveedores</a>
+                            <a href="#">Clientes</a>
                         </li>
 						<li>
                             <a href="#">Asistentes</a>
                         </li>
                         <li class="active">
-                            <strong>Consultar envios de correo a proveedores</strong>
+                            <strong>Consultar envios de correo a clientes</strong>
                         </li>
                     </ol>
 				</div>
 				<?php if (PermitirFuncion(601)) {?>
                 <div class="col-sm-4">
 					<div class="title-action">
-						<a href="envio_correo_proveedores.php" class="alkin btn btn-primary"><i class="fa fa-plus-circle"></i> Crear nuevo envio de correo a proveedores</a>
+						<a href="envio_correo_clientes.php" class="alkin btn btn-primary"><i class="fa fa-plus-circle"></i> Crear nuevo envio de correo a clientes</a>
 					</div>
 				</div>
 				<?php }?>
@@ -191,7 +191,7 @@ function SeleccionarTodos(){
 				<div class="col-lg-12">
 			    <div class="ibox-content">
 					 <?php include "includes/spinner.php";?>
-				  <form action="consultar_envio_correo_proveedores.php" method="get" id="formBuscar" class="form-horizontal">
+				  <form action="consultar_envio_correo_clientes.php" method="get" id="formBuscar" class="form-horizontal">
 					  	<div class="form-group">
 							<label class="col-xs-12"><h3 class="bg-success p-xs b-r-sm"><i class="fa fa-filter"></i> Datos para filtrar</h3></label>
 						</div>
@@ -205,7 +205,7 @@ function SeleccionarTodos(){
 								</div>
 							</div>
 
-							<label class="col-lg-1 control-label">Proveedor</label>
+							<label class="col-lg-1 control-label">Cliente</label>
 							<div class="col-lg-3">
 								<input name="Cliente" type="hidden" id="Cliente" value="<?php if (isset($_GET['Cliente']) && ($_GET['Cliente'] != "")) {echo $_GET['Cliente'];}?>">
 								<input name="NombreCliente" type="text" class="form-control" id="NombreCliente" placeholder="Para TODOS, dejar vacio..." value="<?php if (isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['NombreCliente'];}?>">
@@ -249,7 +249,7 @@ function SeleccionarTodos(){
 							<thead>
 							<tr>
 								<th>ID</th>
-								<th>Proveedor</th>
+								<th>Cliente</th>
 								<th>Fecha Creación</th>
 								<th>Descripción</th>
 								<th>Acciones</th>
@@ -259,11 +259,11 @@ function SeleccionarTodos(){
 								<?php while ($row = sqlsrv_fetch_array($SQL)) {?>
 									<tr class="odd gradeX line" >
 										<td><?php echo $row['id']; ?></td>
-										<td><?php echo $row['id_proveedor'] . " - " . $row['proveedor']; ?></td>
+										<td><?php echo $row['id_cliente'] . " - " . $row['cliente']; ?></td>
 										<td><?php if ($row['fecha_creacion'] != "") {echo $row['fecha_creacion']->format('Y-m-d');} else {echo "--";}?></td>
 										<td><?php echo $row['descripcion']; ?></td>
 										<td>
-											<a href="envio_correo_proveedores.php?id=<?php echo $row['id']; ?>" class="alkin btn btn-success btn-xs"><i class="fa fa-folder-open-o"></i> Abrir</a>
+											<a href="envio_correo_clientes.php?id=<?php echo $row['id']; ?>" class="alkin btn btn-success btn-xs"><i class="fa fa-folder-open-o"></i> Abrir</a>
 										</td>
 									</tr>
 								<?php }?>
@@ -317,7 +317,7 @@ function SeleccionarTodos(){
 
 			var options = {
 				url: function(phrase) {
-					return "ajx_buscar_datos_json.php?type=7&id="+phrase+"&pv=1";
+					return "ajx_buscar_datos_json.php?type=7&id="+phrase;
 				},
 
 				getValue: "NombreBuscarCliente",
