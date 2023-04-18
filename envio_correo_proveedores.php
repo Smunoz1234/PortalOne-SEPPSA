@@ -1,12 +1,12 @@
 <?php require_once "includes/conexion.php";
 PermitirAcceso(601);
 $sw = 0;
-$sp = 'sp_ConsultarPagosEfectuados';
+$sp = 'sp_ConsultarPagosProveedores';
 
 // AGREGAR FILTRO DE PROVEEDOR
-$Proveedor = "";
+$Cliente = "";
 if (isset($_GET['Cliente']) && $_GET['Cliente'] != "") {
-    $Proveedor = $_GET['Cliente'];
+    $Cliente = $_GET['Cliente'];
     $sw = 1;
 }
 
@@ -54,17 +54,50 @@ if (isset($_GET['FF_Pago']) && $_GET['FF_Pago'] != "") {
     $FF_Pago = date('Y-m-d');
 }
 
+// AGREGAR FILTRO DE EGRESO
+$PagoEfectuado = "";
+if (isset($_GET['Egreso']) && $_GET['Egreso'] != "") {
+    $PagoEfectuado = $_GET['Egreso'];
+    $sw = 1;
+}
+
 if ($sw == 1) {
     $Param = array(
-        "'" . $Proveedor . "'",
+        "'" . $Cliente . "'",
         "'" . FormatoFecha($FI_Registro) . "'",
         "'" . FormatoFecha($FF_Registro) . "'",
         "'" . FormatoFecha($FI_Pago) . "'",
         "'" . FormatoFecha($FF_Pago) . "'",
+        "'" . $PagoEfectuado . "'",
     );
 
     $SQL = EjecutarSP($sp, $Param);
 }
+
+// Esto debe estar al final, paran o generar conflictos con la lógica anterior.
+$id = $_GET["id"] ?? "";
+
+if ($id != "") {
+    $sw = 1;
+
+    $SQL_Encabezado = Seleccionar("tbl_PagosProveedores_Correos", "*", "id=$id");
+    $row_Encabezado = sqlsrv_fetch_array($SQL_Encabezado);
+
+    $fecha_inicial = $row_Encabezado["fecha_inicial"]->format('Y-m-d');
+    $fecha_final = $row_Encabezado["fecha_final"]->format('Y-m-d');
+    $id_proveedor = $row_Encabezado["id_proveedor"];
+    $proveedor = $row_Encabezado["proveedor"];
+
+    // No esta en la tabla actualmente.
+    // $egreso_pago = $row_Encabezado["egreso_pago"];
+
+    $descripcion = $row_Encabezado["descripcion"];
+
+    // Cuerpo o detalle.
+    $Param = array(); // Solución conflicto exportar excel.
+    $SQL = Seleccionar("tbl_PagosProveedores_Correos_Detalle", "*", "id=$id");
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -219,23 +252,23 @@ if ($sw == 1) {
 								<label class="col-lg-1 control-label">Fecha de pago</label>
 								<div class="col-lg-3">
 									<div class="input-daterange input-group" id="datepicker">
-										<input name="FI_Pago" type="text" class="input-sm form-control fecha" id="FI_Pago" placeholder="Fecha inicial" value="<?php echo $FI_Pago; ?>" autocomplete="off"/>
+										<input name="FI_Pago" type="text" class="input-sm form-control fecha" id="FI_Pago" placeholder="Fecha inicial" value="<?php echo ($id == "") ? $FI_Pago : $fecha_inicial; ?>" autocomplete="off"/>
 										<span class="input-group-addon">hasta</span>
-										<input name="FF_Pago" type="text" class="input-sm form-control fecha" id="FF_Pago" placeholder="Fecha final" value="<?php echo $FF_Pago; ?>" autocomplete="off" />
+										<input name="FF_Pago" type="text" class="input-sm form-control fecha" id="FF_Pago" placeholder="Fecha final" value="<?php echo ($id == "") ? $FF_Pago : $fecha_final; ?>" autocomplete="off" />
 									</div>
 								</div>
 
 								<label class="col-lg-1 control-label">Número Egreso</label>
 								<div class="col-lg-3">
-									<input name="CiudadSede" type="text" class="form-control" id="CiudadSede" maxlength="100" value="<?php if (isset($_GET['CiudadSede']) && ($_GET['CiudadSede'] != "")) {echo $_GET['CiudadSede'];}?>">
+									<input name="Egreso" type="text" class="form-control" id="Egreso" value="<?php if (isset($_GET['Egreso']) && ($_GET['Egreso'] != "")) {echo $_GET['Egreso'];}?>">
 								</div>
 							</div>
 
 							<div class="form-group">
 								<label class="col-lg-1 control-label">Proveedor</label>
 								<div class="col-lg-3">
-									<input name="Cliente" type="hidden" id="Cliente" value="<?php if (isset($_GET['Cliente']) && ($_GET['Cliente'] != "")) {echo $_GET['Cliente'];}?>">
-									<input name="NombreCliente" type="text" class="form-control" id="NombreCliente" placeholder="Para TODOS, dejar vacio..." value="<?php if (isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['NombreCliente'];}?>">
+									<input name="Cliente" type="hidden" id="Cliente" value="<?php if (isset($_GET['Cliente']) && isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['Cliente'];} elseif ($id != "") {echo $id_proveedor;}?>">
+									<input name="NombreCliente" type="text" class="form-control" id="NombreCliente" placeholder="Para TODOS, dejar vacio..." value="<?php if (isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['NombreCliente'];} elseif ($id != "") {echo $proveedor;}?>">
 								</div>
 
 								<div class="col-lg-4">
@@ -266,11 +299,11 @@ if ($sw == 1) {
 								<div class="form-group">
 									<label class="col-lg-2 control-label">Descripción <span class="text-danger">*</span></label>
 									<div class="col-lg-6">
-										<textarea name="descripcion" id="descripcion" rows="5" cols="70" maxlength="250"></textarea>
+										<textarea name="descripcion" id="descripcion" rows="5" cols="70" maxlength="250"><?php if ($id != "") {echo $descripcion;}?></textarea>
 									</div>
 
 									<div class="col-lg-4">
-										<a class="btn btn-outline btn-info" href="exportar_excel.php?exp=10&Cons=<?php echo base64_encode(implode(",", $Param)); ?>&sp=<?php echo base64_encode($sp); ?>">Exportar a Excel</a>
+										<a class="btn btn-outline btn-info" href="exportar_excel.php?exp=10&Cons=<?php echo base64_encode(implode(",", $Param)); ?>&sp=<?php echo base64_encode($sp); ?>"><i class="fa fa-file-excel-o"></i> Exportar a Excel</a>
 									</div>
 								</div>
 							<?php }?>
@@ -309,6 +342,8 @@ if ($sw == 1) {
 
 										<th>Correo electrónico</th>
 
+										<th>Contacto<th>
+
 										<?php if (false) {?>
 											<th>Estado Envio</th>
 										<?php }?>
@@ -325,7 +360,7 @@ if ($sw == 1) {
 
 											<td><?php echo $row['id_proveedor'] . " - " . $row['proveedor']; ?></td>
 
-											<td><?php echo $row['numero_factura_Proveedor']; ?></td>
+											<td><?php echo $row['numero_factura_proveedor']; ?></td>
 											<td><?php echo $row['numero_factura_SAPB1']; ?></td>
 
 											<td><?php if ($row['fecha_factura'] != "") {echo $row['fecha_factura']->format('Y-m-d');} else {echo "--";}?></td>
@@ -337,7 +372,7 @@ if ($sw == 1) {
 											<td><?php if ($row['fecha_pago'] != "") {echo $row['fecha_pago']->format('Y-m-d');} else {echo "--";}?></td>
 											<td align="right">
 												Efectivo: <?php echo number_format($row['valor_pago_efectivo'], 2); ?>
-												<br>Transferencia: <?php echo number_format($row['valor_pago_tranferencia'], 2); ?>
+												<br>Transferencia: <?php echo number_format($row['valor_pago_transferencia'], 2); ?>
 												<br>Cheque: <?php echo number_format($row['valor_pago_cheque'], 2); ?>
 												<br>Núm. Cheque: <?php echo $row['numero_cheque'] ?? "--"; ?>
 											</td>
@@ -348,6 +383,8 @@ if ($sw == 1) {
 													<?php echo "<br>" . $correo; ?>
 												<?php }?>
 											</td>
+
+											<td><?php if (isset($row['contacto']) && ($row['contacto'] != "")) {echo $row['id_contacto'] . " - " . $row['contacto'];}?></td>
 
 											<?php if (false) {?>
 												<td>
@@ -378,6 +415,15 @@ if ($sw == 1) {
 
 <script>
 $(document).ready(function(){
+	// SMM, 17/04/2023
+	<?php if ($id != "") {?>
+		$("input").prop("disabled", true);
+		$("button").prop("disabled", true);
+
+		$("a").attr("disabled", true);
+		$("textarea").attr("disabled", true);
+	<?php }?>
+
 	function GuardarLineas() {
 		let descripcion = $("#descripcion").val();
 		let id_proveedor = $("#Cliente").val();
@@ -576,7 +622,7 @@ $(document).ready(function(){
 
 	$('.dataTables-example').DataTable({
 		pageLength: 10,
-		responsive: true,
+		responsive: false,
 		dom: '<"html5buttons"B>lTfgitp',
 		language: {
 			"decimal":        "",

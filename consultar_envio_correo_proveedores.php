@@ -252,6 +252,7 @@ function SeleccionarTodos(){
 								<th>Proveedor</th>
 								<th>Fecha Creación</th>
 								<th>Descripción</th>
+								<th>Acciones</th>
 							</tr>
 							</thead>
 							<tbody>
@@ -261,6 +262,9 @@ function SeleccionarTodos(){
 										<td><?php echo $row['id_proveedor'] . " - " . $row['proveedor']; ?></td>
 										<td><?php if ($row['fecha_creacion'] != "") {echo $row['fecha_creacion']->format('Y-m-d');} else {echo "--";}?></td>
 										<td><?php echo $row['descripcion']; ?></td>
+										<td>
+											<a href="envio_correo_proveedores.php?id=<?php echo $row['id']; ?>" class="alkin btn btn-success btn-xs"><i class="fa fa-folder-open-o"></i> Abrir</a>
+										</td>
 									</tr>
 								<?php }?>
 							</tbody>
