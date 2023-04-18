@@ -285,7 +285,7 @@ if ($id != "") {
 								<div class="form-group">
 									<label class="col-lg-2 control-label">ID</label>
 									<div class="col-lg-3">
-										<input name="ID" type="text" class="form-control" id="ID" value="<?php echo $_GET['ID'] ?? ""; ?>" readonly>
+										<input name="ID" type="text" class="form-control" id="ID" value="<?php echo $_GET['ID'] ?? $id; ?>" readonly>
 									</div>
 
 									<div class="col-lg-3"></div>
@@ -298,7 +298,7 @@ if ($id != "") {
 								<div class="form-group">
 									<label class="col-lg-2 control-label">Descripción <span class="text-danger">*</span></label>
 									<div class="col-lg-6">
-										<textarea name="descripcion" id="descripcion" rows="5" cols="70" maxlength="250"></textarea>
+										<textarea name="descripcion" id="descripcion" rows="5" cols="70" maxlength="250"><?php if (isset($_GET['descripcion']) && ($_GET['descripcion'] != "")) {echo $_GET['descripcion'];} elseif ($id != "") {echo $descripcion;}?></textarea>
 									</div>
 
 									<div class="col-lg-4">
@@ -416,11 +416,9 @@ if ($id != "") {
 $(document).ready(function(){
 	// SMM, 17/04/2023
 	<?php if ($id != "") {?>
-		$("input").prop("readonly", true);
+		$("input").prop("disabled", true);
 		$("button").prop("disabled", true);
-
-		$("a").attr("disabled", true);
-		$("textarea").attr("disabled", true);
+		$("textarea").prop("disabled", true);
 	<?php }?>
 
 	function GuardarLineas() {
@@ -471,6 +469,9 @@ $(document).ready(function(){
 				filasErroneas.push(facturaSAP);
 			}
 
+			// Buscar datos de contacto
+			let datos_contacto = rowData[11].split(" - ");
+
 			let rowObj = {
 				id_proveedor: datos_proveedor[0],
 				proveedor: datos_proveedor[1],
@@ -486,8 +487,8 @@ $(document).ready(function(){
 				valor_pago_efectivo: valor_pago_efectivo,
 				numero_cheque: numero_cheque,
 				valor_pago_cheque: valor_pago_cheque,
-				id_contacto: "",
-				contacto: "",
+				id_contacto: datos_contacto[0],
+				contacto: datos_contacto[1],
 				lista_correo_electronico_envio: textoCorreos
 			};
 
