@@ -251,6 +251,12 @@ if (($sw == 1) && ($id == "")) {
                         </li>
                     </ol>
                 </div>
+
+				<div class="col-sm-4">
+					<div class="title-action">
+						<a href="consultar_envio_correo_proveedores.php" class="alkin btn btn-outline btn-default"><i class="fa fa-arrow-circle-o-left"></i> Regresar a consultar</a>
+					</div>
+				</div>
             </div>
          <div class="wrapper wrapper-content">
 		  <div class="row">
@@ -402,7 +408,8 @@ if (($sw == 1) && ($id == "")) {
 
 											<?php if ($id != "") {?>
 												<td>
-													<br>Estado: <?php echo $row['estado_envio_correo'] ?? "--"; ?>
+													<?php $state = $row['estado_envio_correo'] ?? "";?>
+													<br>Estado: <?php if ($state == "E") {echo "<i class='fa fa-check' style='color: green'></i>";} elseif ($state == "N") {echo "<b style='color: red'>x</b>";} else {echo "--";}?>
 													<br>Mensaje: <?php echo $row['mensaje_envio'] ?? "--"; ?>
 												</td>
 											<?php }?>
