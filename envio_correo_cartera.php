@@ -120,7 +120,7 @@ if (($sw == 1) && ($id == "")) {
 <head>
 <?php include_once "includes/cabecera.php";?>
 <!-- InstanceBeginEditable name="doctitle" -->
-<title>Envio correo pagos a proveedores | <?php echo NOMBRE_PORTAL; ?></title>
+<title>Envio correo estado cartera clientes | <?php echo NOMBRE_PORTAL; ?></title>
 <!-- InstanceEndEditable -->
 <!-- InstanceBeginEditable name="head" -->
 
@@ -235,26 +235,26 @@ if (($sw == 1) && ($id == "")) {
         <!-- InstanceBeginEditable name="Contenido" -->
         <div class="row wrapper border-bottom white-bg page-heading">
                 <div class="col-sm-8">
-                    <h2>Envio correo pagos a proveedores</h2>
+                    <h2>Envio correo estado cartera clientes</h2>
                     <ol class="breadcrumb">
                         <li>
                             <a href="index1.php">Inicio</a>
                         </li>
                         <li>
-                            <a href="#">Proveedores</a>
+                            <a href="#">Cartera/CRM</a>
                         </li>
 						<li>
                             <a href="#">Asistentes</a>
                         </li>
                         <li class="active">
-                            <strong>Envio correo pagos a proveedores</strong>
+                            <strong>Envio correo estado cartera clientes</strong>
                         </li>
                     </ol>
                 </div>
 
 				<div class="col-sm-4">
 					<div class="title-action">
-						<a href="consultar_envio_correo_proveedores.php" class="alkin btn btn-outline btn-default"><i class="fa fa-arrow-circle-o-left"></i> Regresar a consultar</a>
+						<a href="consultar_envio_correo_cartera.php" class="alkin btn btn-outline btn-default"><i class="fa fa-arrow-circle-o-left"></i> Regresar a consultar</a>
 					</div>
 				</div>
             </div>
@@ -263,7 +263,7 @@ if (($sw == 1) && ($id == "")) {
 				<div class="col-lg-12">
 					<div class="ibox-content">
 						 <?php include "includes/spinner.php";?>
-					  <form action="envio_correo_proveedores.php" method="get" id="formBuscar" class="form-horizontal">
+					  <form action="envio_correo_cartera.php" method="get" id="formBuscar" class="form-horizontal">
 							<div class="form-group">
 								<label class="col-xs-12"><h3 class="bg-success p-xs b-r-sm"><i class="fa fa-filter"></i> Datos para filtrar</h3></label>
 							</div>
@@ -552,7 +552,7 @@ $(document).ready(function(){
 
 		if(!errorID && !errorCorreos && !errorData) {
 			$.ajax({
-				url: "envio_correo_proveedores_ws.php",
+				url: "envio_correo_cartera_ws.php",
 				method: "POST",
 				data: {
 					descripcion: descripcion,
@@ -569,7 +569,7 @@ $(document).ready(function(){
 							text: "Procedimiento ejecutado exitosamente.",
 							icon: "success"
 						}).then(function() {
-							window.location.href = "consultar_envio_correo_proveedores.php";
+							window.location.href = "consultar_envio_correo_cartera.php";
 						});
 					} else {
 						Swal.fire({

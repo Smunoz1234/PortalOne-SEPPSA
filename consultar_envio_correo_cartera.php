@@ -161,7 +161,7 @@ function SeleccionarTodos(){
                             <a href="index1.php">Inicio</a>
                         </li>
                         <li>
-                            <a href="#">Proveedores</a>
+                            <a href="#">Cartera/CRM</a>
                         </li>
 						<li>
                             <a href="#">Asistentes</a>
@@ -174,7 +174,7 @@ function SeleccionarTodos(){
 				<?php if (PermitirFuncion(601)) {?>
                 <div class="col-sm-4">
 					<div class="title-action">
-						<a href="envio_correo_proveedores.php" class="alkin btn btn-primary"><i class="fa fa-plus-circle"></i> Crear nuevo envio de correo a proveedores</a>
+						<a href="envio_correo_cartera.php" class="alkin btn btn-primary"><i class="fa fa-plus-circle"></i> Crear nuevo envio de correo a proveedores</a>
 					</div>
 				</div>
 				<?php }?>
@@ -191,7 +191,7 @@ function SeleccionarTodos(){
 				<div class="col-lg-12">
 			    <div class="ibox-content">
 					 <?php include "includes/spinner.php";?>
-				  <form action="consultar_envio_correo_proveedores.php" method="get" id="formBuscar" class="form-horizontal">
+				  <form action="consultar_envio_correo_cartera.php" method="get" id="formBuscar" class="form-horizontal">
 					  	<div class="form-group">
 							<label class="col-xs-12"><h3 class="bg-success p-xs b-r-sm"><i class="fa fa-filter"></i> Datos para filtrar</h3></label>
 						</div>
@@ -263,7 +263,7 @@ function SeleccionarTodos(){
 										<td><?php if ($row['fecha_creacion'] != "") {echo $row['fecha_creacion']->format('Y-m-d');} else {echo "--";}?></td>
 										<td><?php echo $row['descripcion']; ?></td>
 										<td>
-											<a href="envio_correo_proveedores.php?id=<?php echo $row['id']; ?>" class="alkin btn btn-success btn-xs"><i class="fa fa-folder-open-o"></i> Abrir</a>
+											<a href="envio_correo_cartera.php?id=<?php echo $row['id']; ?>" class="alkin btn btn-success btn-xs"><i class="fa fa-folder-open-o"></i> Abrir</a>
 										</td>
 									</tr>
 								<?php }?>
