@@ -403,6 +403,8 @@ $Num_Menu = sqlsrv_num_rows($SQL_Menu);
 						<?php if (PermitirFuncion(801)) {?><li><a class="alnk" href="consultar_gestiones.php">Consultar gestiones</a></li><?php }?>
 						<?php if (PermitirFuncion(802)) {?><li><a class="alnk" href="reporte_gestiones_cartera.php">Reporte de gestiones</a></li><?php }?>
 
+						<?php if (true) {?><li><a class="alnk" href="parametros_frecuencia_cartera.php">Consultar parametros frecuencia de cartera</a></li><?php }?>
+
 						<?php if (true) {?>
 						<li>
 							<a href="#">Asistentes <span class="fa arrow"></span></a>
