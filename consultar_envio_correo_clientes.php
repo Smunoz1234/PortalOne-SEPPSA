@@ -50,7 +50,7 @@ if ($sw == 1) {
 <head>
 <?php include_once "includes/cabecera.php";?>
 <!-- InstanceBeginEditable name="doctitle" -->
-<title>Consultar envios de correo a clientes</title>
+<title>Consultar envios de correo pagos de clientes</title>
 <!-- InstanceEndEditable -->
 <!-- InstanceBeginEditable name="head" -->
 <script type="text/javascript">
@@ -155,7 +155,7 @@ function SeleccionarTodos(){
         <!-- InstanceBeginEditable name="Contenido" -->
         <div class="row wrapper border-bottom white-bg page-heading">
                 <div class="col-sm-8">
-                    <h2>Consultar envios de correo a clientes</h2>
+                    <h2>Consultar envios de correo pagos de clientes</h2>
                     <ol class="breadcrumb">
                         <li>
                             <a href="index1.php">Inicio</a>
@@ -167,7 +167,7 @@ function SeleccionarTodos(){
                             <a href="#">Asistentes</a>
                         </li>
                         <li class="active">
-                            <strong>Consultar envios de correo a clientes</strong>
+                            <strong>Consultar envios de correo pagos de clientes</strong>
                         </li>
                     </ol>
 				</div>

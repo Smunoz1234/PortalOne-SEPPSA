@@ -392,16 +392,6 @@ $Num_Menu = sqlsrv_num_rows($SQL_Menu);
 								<li><a class="alnk" href="prov_certificado_retenciones.php">Certificado de retenciones</a></li>
 							</ul>
 						</li>
-
-						<?php if (true) {?>
-						<li>
-							<a href="#">Asistentes <span class="fa arrow"></span></a>
-							<ul class='nav nav-third-level'>
-								<?php if (true) {?><li><a class="alnk" href="consultar_envio_correo_clientes.php">Envío correo a clientes</a></li><?php }?>
-								<?php if (true) {?><li><a class="alnk" href="consultar_envio_correo_proveedores.php">Envío correo a proveedores</a></li><?php }?>
-							</ul>
-						</li>
-						<?php }?>
                     </ul>
                 </li>
 				<?php }?>
@@ -412,6 +402,17 @@ $Num_Menu = sqlsrv_num_rows($SQL_Menu);
 						<?php if (PermitirFuncion(801)) {?><li><a class="alnk" href="consultar_cliente_cartera.php">Consultar cliente</a></li><?php }?>
 						<?php if (PermitirFuncion(801)) {?><li><a class="alnk" href="consultar_gestiones.php">Consultar gestiones</a></li><?php }?>
 						<?php if (PermitirFuncion(802)) {?><li><a class="alnk" href="reporte_gestiones_cartera.php">Reporte de gestiones</a></li><?php }?>
+
+						<?php if (true) {?>
+						<li>
+							<a href="#">Asistentes <span class="fa arrow"></span></a>
+							<ul class='nav nav-third-level'>
+								<?php if (true) {?><li><a class="alnk" href="consultar_envio_correo_clientes.php">Envío correo pagos de clientes</a></li><?php }?>
+								<?php if (true) {?><li><a class="alnk" href="consultar_envio_correo_proveedores.php">Envío correo pagos a proveedores</a></li><?php }?>
+								<?php if (true) {?><li><a class="alnk" href="consultar_envio_correo_cartera.php">Envío correo estado cartera clientes</a></li><?php }?>
+							</ul>
+						</li>
+						<?php }?>
                     </ul>
                 </li>
 				<?php }?>

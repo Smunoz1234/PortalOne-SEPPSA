@@ -120,7 +120,7 @@ if (($sw == 1) && ($id == "")) {
 <head>
 <?php include_once "includes/cabecera.php";?>
 <!-- InstanceBeginEditable name="doctitle" -->
-<title>Envio correo a clientes | <?php echo NOMBRE_PORTAL; ?></title>
+<title>Envio correo pagos de clientes | <?php echo NOMBRE_PORTAL; ?></title>
 <!-- InstanceEndEditable -->
 <!-- InstanceBeginEditable name="head" -->
 
@@ -235,7 +235,7 @@ if (($sw == 1) && ($id == "")) {
         <!-- InstanceBeginEditable name="Contenido" -->
         <div class="row wrapper border-bottom white-bg page-heading">
                 <div class="col-sm-8">
-                    <h2>Envio correo a clientes</h2>
+                    <h2>Envio correo pagos de clientes</h2>
                     <ol class="breadcrumb">
                         <li>
                             <a href="index1.php">Inicio</a>
@@ -247,7 +247,7 @@ if (($sw == 1) && ($id == "")) {
                             <a href="#">Asistentes</a>
                         </li>
                         <li class="active">
-                            <strong>Envio correo a clientes</strong>
+                            <strong>Envio correo pagos de clientes</strong>
                         </li>
                     </ol>
                 </div>
