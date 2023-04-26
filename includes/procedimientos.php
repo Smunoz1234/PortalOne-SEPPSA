@@ -1314,6 +1314,15 @@ if (isset($_GET['type']) && $_GET['type'] != "") {
         }
     }
 
+    // SMM, 25/04/2023
+    elseif ($_GET['type'] == 67) { // Eliminar una linea de la tabla de frecuencia de cartera
+        $ID = $_GET['linenum'] ?? "";
+        $SQL_Del = Eliminar("tbl_EnvioCorreos_CarteraFrecuencia", "[id]='$ID'");
+        if ($SQL_Del) {
+            echo "*Ok*";
+        }
+    }
+
     // Cerrar conexión
     sqlsrv_close($conexion);
 }

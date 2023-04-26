@@ -8,28 +8,39 @@ $msg_error = "";
 
 // Crear nuevo parametro
 if (isset($_POST['MM_Insert']) && ($_POST['MM_Insert'] != "")) {
+    $fecha_registro = "'" . FormatoFecha(date('Y-m-d')) . "'";
+    $usuario = "'" . $_SESSION['CodUser'] . "'";
+    $fecha_hora = "'" . FormatoFecha(date('Y-m-d'), date('H:i:s')) . "'";
+
+    $id = ($_POST['ID'] == "") ? "NULL" : ("'" . $_POST['ID'] . "'");
 
     $Param = array(
         "'" . $_POST['type'] . "'",
-        "'" . $_POST['ID'] . "'",
-        "'" . $_POST['SerieDoc'] . "'",
-        "'" . $_POST['TipoDoc'] . "'",
-        "'" . $_POST['IdSucursal'] . "'",
-        "'" . $_POST['WhsCode'] . "'",
-        "'" . $_POST['ToWhsCode'] . "'",
-        "'" . $_POST['IdBodegaDefecto'] . "'",
+        $id,
+        "'" . $_POST['descripcion_frecuencia'] . "'",
+        "'" . $_POST['cantidad_dias'] . "'",
+        "'" . $_POST['tipo_vencimiento'] . "'",
+        "'" . $_POST['hora_envio'] . "'",
+        "NULL", // estado_frecuencia
+        $fecha_registro,
+        $usuario, // @id_usuario_actualizacion
+        $fecha_hora, // @fecha_actualizacion
+        $fecha_hora, // @hora_actualizacion
+        $usuario, // @id_usuario_creacion
+        $fecha_hora, // @fecha_creacion
+        $fecha_hora, // @hora_creacion
     );
-    $SQL = EjecutarSP('sp_tbl_SeriesSucursalesAlmacenes', $Param);
+    $SQL = EjecutarSP('sp_tbl_EnvioCorreos_CarteraFrecuencia', $Param);
     if ($SQL) {
         $a = ($_POST['type'] == 1) ? "OK_NewParam" : "OK_UpdParam";
-        header('Location:gestionar_series.php?a=' . base64_encode($a));
+        header('Location:parametros_frecuencia_cartera.php?a=' . base64_encode($a));
     } else {
         $sw_error = 1;
         $msg_error = "No se pudo insertar el nuevo registro";
     }
 }
 
-$SQL = Seleccionar("uvw_tbl_SeriesSucursalesAlmacenes", "*");
+$SQL = Seleccionar("tbl_EnvioCorreos_CarteraFrecuencia", "*");
 ?>
 
 <!DOCTYPE html>
@@ -38,7 +49,7 @@ $SQL = Seleccionar("uvw_tbl_SeriesSucursalesAlmacenes", "*");
 <head>
 <?php include_once "includes/cabecera.php";?>
 <!-- InstanceBeginEditable name="doctitle" -->
-<title>Gestionar series | <?php echo NOMBRE_PORTAL; ?></title>
+<title>Parametros Cartera Frecuencia | <?php echo NOMBRE_PORTAL; ?></title>
 <!-- InstanceEndEditable -->
 <!-- InstanceBeginEditable name="head" -->
 <style>
@@ -109,7 +120,7 @@ if (isset($sw_error) && ($sw_error == 1)) {
         <!-- InstanceBeginEditable name="Contenido" -->
         <div class="row wrapper border-bottom white-bg page-heading">
                 <div class="col-sm-8">
-                    <h2>Gestionar series</h2>
+                    <h2>Parametros Cartera Frecuencia</h2>
                     <ol class="breadcrumb">
                         <li>
                             <a href="index1.php">Inicio</a>
@@ -118,7 +129,7 @@ if (isset($sw_error) && ($sw_error == 1)) {
                             <a href="#">Administración</a>
                         </li>
                         <li class="active">
-                            <strong>Gestionar series</strong>
+                            <strong>Parametros Cartera Frecuencia</strong>
                         </li>
                     </ol>
                 </div>
@@ -162,14 +173,11 @@ if (isset($sw_error) && ($sw_error == 1)) {
 							<thead>
 							<tr>
 								<th>#</th>
-								<th>ID tipo documento</th>
-								<th>Tipo documento</th>
-								<th>ID Serie (Formato)</th>
-								<th>Nombre Serie</th>
-								<th>Dimensión 1</th>
-								<th>Almacén origen</th>
-								<th>Almacén destino</th>
-								<th>Almacén defecto</th>
+								<th>Descripción</th>
+								<th>Cantidad Días</th>
+								<th>Tipo Vencimiento</th>
+								<th>Hora Envío</th>
+								<th>Fecha Creación</th>
 								<th>Acciones</th>
 							</tr>
 							</thead>
@@ -177,19 +185,16 @@ if (isset($sw_error) && ($sw_error == 1)) {
 							<tbody>
 								<?php while ($row = sqlsrv_fetch_array($SQL)) {?>
 									<tr class="gradeX">
-										<td><?php echo $row['ID']; ?></td>
-										<td><?php echo $row['IdTipoDocumento']; ?></td>
-										<td><?php echo $row['DeTipoDocumento']; ?></td>
-										<td><?php echo $row['IdSeries']; ?></td>
-										<td><?php echo $row['DeSeries']; ?></td>
-										<td><?php echo $row['IdSucursal'] . " - " . $row['DeSucursal']; ?></td>
-										<td><?php echo $row['WhsCode'] . " - " . $row['WhsName']; ?></td>
-										<td><?php echo $row['ToWhsCode'] . " - " . $row['ToWhsName']; ?></td>
-										<td><?php echo $row['IdBodegaDefecto'] . " - " . $row['DeBodegaDefecto']; ?></td>
+										<td><?php echo $row['id']; ?></td>
+										<td><?php echo $row['descripcion_frecuencia']; ?></td>
+										<td><?php echo $row['cantidad_dias']; ?></td>
+										<td><?php echo ($row['tipo_vencimiento'] == "1") ? "Después del vencimiento" : "Antes del vencimiento"; ?></td>
+										<td><?php if ($row['hora_envio'] != "") {echo $row['hora_envio']->format('H:i');} else {echo "--";}?></td>
+										<td><?php if ($row['fecha_creacion'] != "") {echo $row['fecha_creacion']->format('Y-m-d');} else {echo "--";}?></td>
 
 										<td>
-											<button type="button" id="btnEdit<?php echo $row['ID']; ?>" class="btn btn-success btn-xs" onClick="EditarCampo('<?php echo $row['ID']; ?>');"><i class="fa fa-pencil"></i> Editar</button>
-											<button type="button" id="btnDel<?php echo $row['ID']; ?>" class="btn btn-danger btn-xs" onClick="BorrarLinea('<?php echo $row['ID']; ?>');"><i class="fa fa-trash"></i> Eliminar</button>
+											<button type="button" id="btnEdit<?php echo $row['id']; ?>" class="btn btn-success btn-xs" onClick="EditarCampo('<?php echo $row['id']; ?>');"><i class="fa fa-pencil"></i> Editar</button>
+											<button type="button" id="btnDel<?php echo $row['id']; ?>" class="btn btn-danger btn-xs" onClick="BorrarLinea('<?php echo $row['id']; ?>');"><i class="fa fa-trash"></i> Eliminar</button>
 										</td>
 									</tr>
 								<?php }?>
@@ -240,9 +245,6 @@ if (isset($sw_error) && ($sw_error == 1)) {
 		 $('.dataTables-example').DataTable({
 			pageLength: 25,
 			dom: '<"html5buttons"B>lTfgitp',
-			rowGroup: {
-				dataSrc: [2]
-			},
 			language: {
 				"decimal":        "",
 				"emptyTable":     "No se encontraron resultados.",
@@ -268,8 +270,6 @@ if (isset($sw_error) && ($sw_error == 1)) {
 				}
 			},
 			buttons: []
-			, order: [[ 1, "asc" ]]
-			, ordering: false
 		});
 	});
 </script>
@@ -279,7 +279,7 @@ function CrearCampo(){
 
 	$.ajax({
 		type: "POST",
-		url: "md_gestionar_series.php",
+		url: "md_parametros_frecuencia_cartera.php",
 		success: function(response){
 			$('.ibox-content').toggleClass('sk-loading',false);
 			$('#ContenidoModal').html(response);
@@ -293,7 +293,7 @@ function EditarCampo(id){
 
 	$.ajax({
 		type: "POST",
-		url: "md_gestionar_series.php",
+		url: "md_parametros_frecuencia_cartera.php",
 		data:{
 			id:id,
 			edit:1
@@ -318,9 +318,9 @@ function BorrarLinea(id){
 		if (result.isConfirmed) {
 			$.ajax({
 				type: "GET",
-				url: "includes/procedimientos.php?type=66&linenum="+id,
+				url: "includes/procedimientos.php?type=67&linenum="+id,
 				success: function(response){
-					location.href = "gestionar_series.php?a=<?php echo base64_encode("OK_DelReg"); ?>";
+					location.href = "parametros_frecuencia_cartera.php?a=<?php echo base64_encode("OK_DelReg"); ?>";
 				},
 				error: function(error) {
 					console.error("consulta erronea");
