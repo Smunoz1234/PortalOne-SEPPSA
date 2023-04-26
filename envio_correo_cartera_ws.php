@@ -3,8 +3,8 @@
 $sw_error = 0;
 
 $descripcion = "'" . $_POST["descripcion"] . "'";
-$id_proveedor = "'" . $_POST["id_proveedor"] . "'";
-$proveedor = "'" . $_POST["proveedor"] . "'";
+$id_cliente = "'" . $_POST["id_cliente"] . "'";
+$cliente = "'" . $_POST["cliente"] . "'";
 $fecha_inicial = "'" . $_POST["fecha_inicial"] . "'";
 $fecha_final = "'" . $_POST["fecha_final"] . "'";
 $fecha_registro = "'" . FormatoFecha(date('Y-m-d')) . "'";
@@ -20,8 +20,8 @@ $Param = array(
     1, // @Type
     "NULL", // @ID
     $descripcion,
-    $id_proveedor,
-    $proveedor,
+    $id_cliente,
+    $cliente,
     $fecha_inicial,
     $fecha_final,
     $fecha_registro,
@@ -32,14 +32,14 @@ $Param = array(
     $fecha_hora, // @fecha_creacion
     $fecha_hora, // @hora_creacion
 );
-$SQL = EjecutarSP('sp_tbl_PagosProveedores_Correos', $Param);
+$SQL = EjecutarSP('sp_tbl_EnvioCorreos_Cartera', $Param);
 if (!$SQL) {
     $sw_error = 1;
     $msg_error = "No se pudo insertar los datos del encabezado.";
 }
 
 // Obtener el ID del Encabezado con la fecha y la hora de creación.
-$SQL_Encabezado = Seleccionar("tbl_PagosProveedores_Correos", "id", "hora_creacion = $fecha_hora");
+$SQL_Encabezado = Seleccionar("tbl_EnvioCorreos_Cartera", "id", "hora_creacion = $fecha_hora");
 $row_Encabezado = sqlsrv_fetch_array($SQL_Encabezado);
 $id = $row_Encabezado["id"];
 
@@ -48,9 +48,9 @@ foreach ($lineas as &$linea) {
         1, // @Type
         $id, // @ID
         "NULL", // @id_linea
-        "'" . $linea->id_proveedor . "'",
-        "'" . $linea->proveedor . "'",
-        "'" . $linea->numero_factura_proveedor . "'",
+        "'" . $linea->id_cliente . "'",
+        "'" . $linea->cliente . "'",
+        "'" . $linea->numero_factura_cliente . "'",
         "'" . $linea->numero_factura_SAPB1 . "'",
         "'" . $linea->fecha_factura . "'",
         "'" . $linea->fecha_vencimiento_factura . "'",
@@ -80,7 +80,7 @@ foreach ($lineas as &$linea) {
     // Insertar Detalle.
     // print_r($Param_Detalle);
 
-    $SQL_Detalle = EjecutarSP('sp_tbl_PagosProveedores_Correos_Detalle', $Param_Detalle);
+    $SQL_Detalle = EjecutarSP('sp_tbl_EnvioCorreos_Cartera_Detalle', $Param_Detalle);
     if (!$SQL_Detalle) {
         $sw_error = 1;
         $msg_error = "No se pudo insertar los datos en el detalle.";
