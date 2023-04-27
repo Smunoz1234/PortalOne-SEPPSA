@@ -10,65 +10,20 @@ if (isset($_GET['Cliente']) && $_GET['Cliente'] != "") {
     $sw = 1;
 }
 
-// AGREGAR FECHA DE FECHA DE REGISTRO
-$FI_Registro = "";
-$FF_Registro = "";
-if (isset($_GET['FI_Registro']) && $_GET['FI_Registro'] != "") {
-    $FI_Registro = $_GET['FI_Registro'];
+// AGREGAR FILTROS DE FECHA DE CORTE
+$FechaCorte = "";
+if (isset($_GET['FechaCorte']) && $_GET['FechaCorte'] != "") {
+    $FechaCorte = $_GET['FechaCorte'];
     $sw = 1;
 } else {
-    /// Restar "n" días a la fecha actual.
-    $nuevaFecha = strtotime('-' . ObtenerVariable("DiasRangoFechasGestionar") . ' day');
-    $nuevaFecha = date('Y-m-d', $nuevaFecha);
-
-    // SMM, 11/04/2023
-    // $FI_Registro = $nuevaFecha;
-}
-if (isset($_GET['FF_Registro']) && $_GET['FF_Registro'] != "") {
-    $FF_Registro = $_GET['FF_Registro'];
-    $sw = 1;
-} else {
-    // SMM, 11/04/2023
-    // $FF_Registro = date('Y-m-d');
+    $FechaCorte = date('Y-m-d');
 }
 
-// AGREGAR FILTROS DE FECHA DE PAGO
-$FI_Pago = "";
-$FF_Pago = "";
-if (isset($_GET['FI_Pago']) && $_GET['FI_Pago'] != "") {
-    $FI_Pago = $_GET['FI_Pago'];
-    $sw = 1;
-} else {
-    // Restar "n" días a la fecha actual.
-    $nuevaFecha = strtotime('-' . ObtenerVariable("DiasRangoFechasGestionar") . ' day');
-    $nuevaFecha = date('Y-m-d', $nuevaFecha);
-
-    // SMM, 11/04/2023
-    $FI_Pago = $nuevaFecha;
-}
-if (isset($_GET['FF_Pago']) && $_GET['FF_Pago'] != "") {
-    $FF_Pago = $_GET['FF_Pago'];
-    $sw = 1;
-} else {
-    // SMM, 11/04/2023
-    $FF_Pago = date('Y-m-d');
-}
-
-// AGREGAR FILTRO DE EGRESO
-$PagoEfectuado = "";
-if (isset($_GET['Egreso']) && $_GET['Egreso'] != "") {
-    $PagoEfectuado = $_GET['Egreso'];
-    $sw = 1;
-}
-
+// Llamar procedimiento.
 if ($sw == 1) {
     $Param = array(
         "'" . $Cliente . "'",
-        "'" . FormatoFecha($FI_Registro) . "'",
-        "'" . FormatoFecha($FF_Registro) . "'",
-        "'" . FormatoFecha($FI_Pago) . "'",
-        "'" . FormatoFecha($FF_Pago) . "'",
-        "'" . $PagoEfectuado . "'",
+        "'" . FormatoFecha($FechaCorte) . "'",
     );
 
     $SQL = EjecutarSP($sp, $Param);
@@ -269,29 +224,20 @@ if (($sw == 1) && ($id == "")) {
 							</div>
 
 							<div class="form-group">
-								<label class="col-lg-1 control-label">Fecha de pago</label>
+								<label class="col-lg-2 control-label">Fecha Corte <span class="text-danger">*</span></label>
 								<div class="col-lg-3">
-									<div class="input-daterange input-group" id="datepicker">
-										<input name="FI_Pago" type="text" class="input-sm form-control fecha" id="FI_Pago" placeholder="Fecha inicial" value="<?php echo ($id == "") ? $FI_Pago : $fecha_inicial; ?>" autocomplete="off"/>
-										<span class="input-group-addon">hasta</span>
-										<input name="FF_Pago" type="text" class="input-sm form-control fecha" id="FF_Pago" placeholder="Fecha final" value="<?php echo ($id == "") ? $FF_Pago : $fecha_final; ?>" autocomplete="off" />
+									<div class="input-group date">
+										<span class="input-group-addon"><i class="fa fa-calendar"></i></span><input required type="text" class="form-control fecha" id="FechaCorte" name="FechaCorte" value="<?php echo ($id == "") ? $FechaCorte : $fecha_corte; ?>" autocomplete="off">
 									</div>
 								</div>
 
-								<label class="col-lg-1 control-label">Número Egreso</label>
-								<div class="col-lg-3">
-									<input name="Egreso" type="number" class="form-control" id="Egreso" value="<?php if (isset($_GET['Egreso']) && ($_GET['Egreso'] != "")) {echo $_GET['Egreso'];}?>">
-								</div>
-							</div>
-
-							<div class="form-group">
 								<label class="col-lg-1 control-label">Cliente</label>
-								<div class="col-lg-3">
+								<div class="col-lg-4">
 									<input name="Cliente" type="hidden" id="Cliente" value="<?php if (isset($_GET['Cliente']) && isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['Cliente'];} elseif ($id != "") {echo $id_cliente;}?>">
 									<input name="NombreCliente" type="text" class="form-control" id="NombreCliente" placeholder="Para TODOS, dejar vacio..." value="<?php if (isset($_GET['NombreCliente']) && ($_GET['NombreCliente'] != "")) {echo $_GET['NombreCliente'];} elseif ($id != "") {echo $nombre_cliente;}?>">
 								</div>
 
-								<div class="col-lg-4">
+								<div class="col-lg-2">
 									<div class="btn-group pull-right">
 										<button type="submit" class="btn btn-outline btn-success"><i class="fa fa-search"></i> Buscar</button>
 									</div>
@@ -348,23 +294,16 @@ if (($sw == 1) && ($id == "")) {
 
 										<th>Cliente</th>
 
-										<th>Núm. Factura Cliente</th>
-										<th>Núm. Factura SAP B1</th>
+										<th>Cantidad días vencidos</th>
+										<th>Cantidad días sin vencer</th>
 
-										<th>Fecha Factura</th>
-										<th>Fecha Vencimiento</th>
-										<th>Valor Factura</th>
-
-										<th>Núm. Pago</th> <!-- Egreso -->
-
-										<th>Fecha Pago</th>
-										<th>Valor Pago</th>
+										<th>Valor</th>
 
 										<th>Correo electrónico</th>
-
 										<th>Contacto</th>
 
 										<?php if ($id != "") {?>
+											<th>Fecha Envio</th>
 											<th>Estado Envio</th>
 										<?php }?>
 									</tr>
@@ -380,21 +319,13 @@ if (($sw == 1) && ($id == "")) {
 
 											<td><?php echo $row['id_cliente'] . " - " . $row['cliente']; ?></td>
 
-											<td><?php echo $row['numero_orden_cliente']; ?></td>
-											<td><?php echo $row['numero_factura_SAPB1']; ?></td>
+											<td><?php echo $row['cantidad_dias_vencidos']; ?></td>
+											<td><?php echo $row['cantidad_dias_sin_vencer']; ?></td>
 
-											<td><?php if ($row['fecha_factura'] != "") {echo $row['fecha_factura']->format('Y-m-d');} else {echo "--";}?></td>
-											<td><?php if ($row['fecha_vencimiento_factura'] != "") {echo $row['fecha_vencimiento_factura']->format('Y-m-d');} else {echo "--";}?></td>
-											<td align="right"><?php echo number_format($row['valor_factura'], 2); ?></td>
-
-											<td><?php echo $row['numero_pago']; ?></td>
-
-											<td><?php if ($row['fecha_pago'] != "") {echo $row['fecha_pago']->format('Y-m-d');} else {echo "--";}?></td>
 											<td align="right">
-												Efectivo: <?php echo number_format($row['valor_pago_efectivo'], 2); ?>
-												<br>Transferencia: <?php echo number_format($row['valor_pago_transferencia'], 2); ?>
-												<br>Cheque: <?php echo number_format($row['valor_pago_cheque'], 2); ?>
-												<br>Núm. Cheque: <?php echo $row['numero_cheque'] ?? "--"; ?>
+												Total: <?php echo number_format($row['valor_total'], 2); ?>
+												<br>Vencido: <?php echo number_format($row['valor_vencido'], 2); ?>
+												<br>Sin Vencer: <?php echo number_format($row['valor_sin_vencer'], 2); ?>
 											</td>
 
 											<td>
@@ -403,10 +334,10 @@ if (($sw == 1) && ($id == "")) {
 													<?php echo "<br>" . $correo; ?>
 												<?php }?>
 											</td>
-
 											<td><?php if (isset($row['contacto']) && ($row['contacto'] != "")) {echo $row['id_contacto'] . " - " . $row['contacto'];}?></td>
 
 											<?php if ($id != "") {?>
+												<td><?php if ($row['fecha_envio'] != "") {echo $row['fecha_envio']->format('Y-m-d');} else {echo "--";}?></td>
 												<td>
 													<?php $state = $row['estado_envio_correo'] ?? "";?>
 													<br>Estado: <?php if ($state == "E") {echo "<i class='fa fa-check' style='color: green'></i>";} elseif ($state == "N") {echo "<b style='color: red'>x</b>";} else {echo "--";}?>

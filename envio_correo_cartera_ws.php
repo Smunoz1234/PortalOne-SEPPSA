@@ -5,9 +5,7 @@ $sw_error = 0;
 $descripcion = "'" . $_POST["descripcion"] . "'";
 $id_cliente = "'" . $_POST["id_cliente"] . "'";
 $cliente = "'" . $_POST["cliente"] . "'";
-$fecha_inicial = "'" . $_POST["fecha_inicial"] . "'";
-$fecha_final = "'" . $_POST["fecha_final"] . "'";
-$fecha_registro = "'" . FormatoFecha(date('Y-m-d')) . "'";
+$fecha_corte = "'" . $_POST["fecha_corte"] . "'";
 $usuario = "'" . $_SESSION['CodUser'] . "'";
 $fecha_hora = "'" . FormatoFecha(date('Y-m-d'), date('H:i:s')) . "'";
 
@@ -22,9 +20,7 @@ $Param = array(
     $descripcion,
     $id_cliente,
     $cliente,
-    $fecha_inicial,
-    $fecha_final,
-    $fecha_registro,
+    $fecha_corte,
     $usuario, // @id_usuario_actualizacion
     $fecha_hora, // @fecha_actualizacion
     $fecha_hora, // @hora_actualizacion
@@ -50,18 +46,14 @@ foreach ($lineas as &$linea) {
         "NULL", // @id_linea
         "'" . $linea->id_cliente . "'",
         "'" . $linea->cliente . "'",
-        "'" . $linea->numero_factura_cliente . "'",
-        "'" . $linea->numero_factura_SAPB1 . "'",
-        "'" . $linea->fecha_factura . "'",
-        "'" . $linea->fecha_vencimiento_factura . "'",
-        "'" . $linea->valor_factura . "'",
-        "'" . $linea->numero_pago . "'",
-        "'" . $linea->fecha_pago . "'",
-        "'" . $linea->valor_pago . "'",
-        "'" . $linea->valor_pago_transferencia . "'",
-        "'" . $linea->valor_pago_efectivo . "'",
-        "'" . $linea->numero_cheque . "'", // Cuando esta vacio llega "--"
-        "'" . $linea->valor_pago_cheque . "'",
+        "'" . $linea->cantidad_dias_vencidos . "'",
+        "'" . $linea->cantidad_dias_sin_vencer . "'",
+        "'" . $linea->valor_total . "'",
+        "'" . $linea->valor_sin_vencer . "'",
+        "'" . $linea->valor_vencido . "'",
+        "NULL",
+        "NULL",
+        "'" . $linea->fecha_envio . "'",
         "'" . $linea->id_contacto . "'",
         "'" . $linea->contacto . "'",
         "'" . $linea->lista_correo_electronico_envio . "'",
